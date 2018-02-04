@@ -64,22 +64,27 @@ else()
 
   add_custom_target(coverage.init.info
       COMMAND ${LCOV_BIN}
+        --rc lcov_branch_coverage=1
         -z -d ${PROJECT_BINARY_DIR}
       COMMAND ${LCOV_BIN}
         -o ${PROJECT_BINARY_DIR}/coverage.init.info
         --gcov-tool ${GCOV_BACKEND}
+	--rc lcov_branch_coverage=1
         -c -i -d ${PROJECT_BINARY_DIR}
       )
   add_custom_target(coverage.info
       COMMAND ${LCOV_BIN}
         -o ${PROJECT_BINARY_DIR}/coverage.info
         --gcov-tool '${GCOV_BACKEND}'
+	--rc lcov_branch_coverage=1
         -c -d ${PROJECT_BINARY_DIR}
       COMMAND ${LCOV_BIN}
+        --rc lcov_branch_coverage=1
         -o ${PROJECT_BINARY_DIR}/coverage.info
         -a ${PROJECT_BINARY_DIR}/coverage.init.info
         -a ${PROJECT_BINARY_DIR}/coverage.info
       COMMAND ${LCOV_BIN}
+        --rc lcov_branch_coverage=1
         -o ${PROJECT_BINARY_DIR}/coverage.info
         -r ${PROJECT_BINARY_DIR}/coverage.info
         '/usr*'
