@@ -40,10 +40,51 @@ endif()
 if(NOT GCOVR_BIN)
   find_program(GCOVR_BIN gcovr)
 endif()
+if(NOT LCOV_BIN)
+  find_program(LCOV_BIN lcov)
+endif()
+if(NOT LLVM_COV_BIN)
+  find_program(LLVM_COV_BIN llvm-cov)
+endif()
 
 if(NOT REPORT_DIR)
   set(REPORT_DIR "${CMAKE_BINARY_DIR}")
   message(STATUS "REPORT_DIR default is ${REPORT_DIR}")
+endif()
+
+if(NOT LCOV_BIN)
+  message(WARNING "lcov can not be found in PATH. lcov is not available.")
+else()
+  message(STATUS "lcov enabled: ${LCOV_BIN}")
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(GCOV_BACKEND ${LLVM_COV_BIN} gcov)
+  else()
+    set(GCOV_BACKEND "gcov")
+  endif()
+
+  add_custom_target(coverage.init.info
+      COMMAND ${LCOV_BIN}
+        -z -d ${PROJECT_BINARY_DIR}
+      COMMAND ${LCOV_BIN}
+        -o ${PROJECT_BINARY_DIR}/coverage.init.info
+        --gcov-tool ${GCOV_BACKEND}
+        -c -i -d ${PROJECT_BINARY_DIR}
+      )
+  add_custom_target(coverage.info
+      COMMAND ${LCOV_BIN}
+        -o ${PROJECT_BINARY_DIR}/coverage.info
+        --gcov-tool '${GCOV_BACKEND}'
+        -c -d ${PROJECT_BINARY_DIR}
+      COMMAND ${LCOV_BIN}
+        -o ${PROJECT_BINARY_DIR}/coverage.info
+        -a ${PROJECT_BINARY_DIR}/coverage.init.info
+        -a ${PROJECT_BINARY_DIR}/coverage.info
+      COMMAND ${LCOV_BIN}
+        -o ${PROJECT_BINARY_DIR}/coverage.info
+        -r ${PROJECT_BINARY_DIR}/coverage.info
+        '/usr*'
+        '${CMAKE_SOURCE_DIR}/external/*'
+      )
 endif()
 
 if(NOT GCOVR_BIN)
