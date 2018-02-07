@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.5.1)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-SET(HUNTER_STATUS_PRINT ON)  # some verbose info
-SET(HUNTER_STATUS_DEBUG ON)  # more verbose info
+SET(HUNTER_STATUS_PRINT ON CACHE BOOL "Verbose info")
+SET(HUNTER_STATUS_DEBUG ON CACHE BOOL "Debug info")
 
-# hunter binary cache server
-set(
-    HUNTER_CACHE_SERVERS
-    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
-    CACHE
-    STRING
-    "Hunter cache servers"
-)
+# TODO:
+## hunter binary cache server
+#set(
+#    HUNTER_CACHE_SERVERS
+#    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
+#    CACHE
+#    STRING
+#    "Hunter cache servers"
+#)
 
 include(HunterGate)
 HunterGate(
