@@ -19,14 +19,16 @@ find_package(Threads REQUIRED)
 if (TESTING)
   hunter_add_package(GTest)
 
-  find_package(GTest CONFIG REQUIRED)
-  find_package(GMock CONFIG REQUIRED)
+  find_package(GTest 1.8.0 CONFIG REQUIRED)
+  find_package(GMock 1.8.0 CONFIG REQUIRED)
 endif ()
 
 #############################
 #         speedlog          #
 #############################
-find_package(spdlog)
+hunter_add_package(spdlog)
+# TODO: I can not specify version, consider creating own package
+find_package(spdlog CONFIG REQUIRED)
 
 ################################
 #           protobuf           #
@@ -43,7 +45,8 @@ find_package(grpc)
 ################################
 #          rapidjson           #
 ################################
-find_package(rapidjson)
+hunter_add_package(RapidJSON)
+find_package(RapidJSON 1.1.0 CONFIG REQUIRED)
 
 #############################
 #         optional          #

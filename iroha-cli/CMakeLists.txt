@@ -38,7 +38,7 @@ target_link_libraries(client
     cryptography
     optional
     logger
-    rapidjson
+    RapidJSON::rapidjson
     pb_model_converters
     json_model_converters
     model_generators

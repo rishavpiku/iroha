@@ -60,7 +60,7 @@ target_link_libraries(model
     common_execution
     schema
     cryptography
-    rapidjson
+    RapidJSON::rapidjson
     )
 
 add_library(model_registrations INTERFACE)
