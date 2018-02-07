@@ -6,7 +6,10 @@ set_directory_properties(PROPERTIES
     EP_PREFIX ${EP_PREFIX}
     )
 
-# Project dependencies.
+
+###################################################################
+##### START OF PROJECT DEPENDENCIES
+
 find_package(Threads REQUIRED)
 
 ##########################
@@ -14,7 +17,10 @@ find_package(Threads REQUIRED)
 ##########################
 # testing is an option. Look at the main CMakeLists.txt for details.
 if (TESTING)
-  find_package(gtest)
+  hunter_add_package(GTest)
+
+  find_package(GTest CONFIG REQUIRED)
+  find_package(GMock CONFIG REQUIRED)
 endif ()
 
 #############################

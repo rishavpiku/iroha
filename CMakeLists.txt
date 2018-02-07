@@ -1,12 +1,29 @@
 cmake_minimum_required(VERSION 3.5.1)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+SET(HUNTER_STATUS_PRINT ON)  # some verbose info
+SET(HUNTER_STATUS_DEBUG ON)  # more verbose info
+
+# hunter binary cache server
+set(
+    HUNTER_CACHE_SERVERS
+    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
+    CACHE
+    STRING
+    "Hunter cache servers"
+)
+
+include(HunterGate)
+HunterGate(
+    URL "https://github.com/ruslo/hunter/archive/v0.20.0.tar.gz"
+    SHA1 "e94556ed41e5432997450bca7232db72a3b0d5ef"
+    FILEPATH ${CMAKE_SOURCE_DIR}/cmake/hunter-config.cmake
+)
+
 PROJECT(
     iroha
     LANGUAGES C CXX
 )
-
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-
 
 option(BENCHMARKING "Build benchmarks"               OFF)
 option(TESTING      "Build tests"                    ON )
