@@ -25,6 +25,7 @@ PROJECT(
     LANGUAGES C CXX
 )
 
+
 option(BENCHMARKING "Build benchmarks"               OFF)
 option(TESTING      "Build tests"                    ON )
 option(COVERAGE     "Enable coverage"                OFF)
