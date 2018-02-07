@@ -1,33 +1,12 @@
 cmake_minimum_required(VERSION 3.5.1)
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-  message(STATUS "ccache enabled (${CCACHE_PROGRAM})")
-endif()
-
-PROJECT(iroha C CXX)
-
-SET(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
-SET(CMAKE_CXX_FLAGS "-std=c++1y -Wall")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
-SET(CMAKE_CXX_FLAGS_DEBUG   "-g -Wextra -Wno-unused-parameter -Wno-deprecated-declarations -O0")
-SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
-SET(CMAKE_INSTALL_RPATH "../lib")
-
-if(COVERAGE)
-  set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
-  set(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "--coverage ${CMAKE_C_FLAGS}")
-  set(CMAKE_SHARED_LINKER_FLAGS "--coverage ${CMAKE_SHARED_LINKER_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "--coverage ${CMAKE_EXE_LINKER_FLAGS}")
-
-  set(REPORT_DIR ${CMAKE_BINARY_DIR}/reports)
-  file(MAKE_DIRECTORY ${REPORT_DIR})
-  include(cmake/analysis.cmake)
-endif()
+PROJECT(
+    iroha
+    LANGUAGES C CXX
+)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+
 
 option(BENCHMARKING "Build benchmarks"               OFF)
 option(TESTING      "Build tests"                    ON )
@@ -43,9 +22,9 @@ option(SWIG_JAVA    "Generate Swig Java bindings"    OFF)
 option(SWIG_CSHARP  "Generate Swig C# bindings"      OFF)
 option(SHARED_MODEL_DISABLE_COMPATIBILITY "Disable backward compatibility in shared model" OFF)
 
-
 if (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug)
+  message(STATUS "Default build type is Debug")
 endif()
 
 if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
@@ -81,10 +60,8 @@ include_directories(
   ${IROHA_SCHEMA_DIR}
 )
 
-include(FeatureSummary)
-include(cmake/functions.cmake)
-include(cmake/dependencies.cmake)
-include(cmake/clang-cxx-dev-tools.cmake)
+# must be here
+include(cmake/setup.cmake)
 
 if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
   include(cmake/release.cmake)
@@ -104,15 +81,4 @@ if(TESTING)
   enable_testing()
   add_subdirectory(test)
 endif()
-
-if (FUZZING)
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_subdirectory(fuzz)
-  else()
-    message(Fuzzing with compilers other than clang does not supported yet)
-  endif()
-endif()
-
-
-
 
