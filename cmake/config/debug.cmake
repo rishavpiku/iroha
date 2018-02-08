@@ -1,9 +1,29 @@
-SET(WARNINGS
-    -Wextra -Wno-unused-parameter
+SET(FLAGS
+    -Wextra
+    -Wno-unused-parameter
     -Wno-deprecated-declarations
+    -O0                             # no optimizations
+    -g                              # include debug symbolx
+
+    CACHE INTERNAL ""
     )
 
-# FLAGS = " ".join([w for w in WARNINGS])
-JOIN("${WARNINGS}" " " FLAGS)
+# JOINED_FLAGS = " ".join([w for w in FLAGS])
+JOIN("${FLAGS}" " " JOINED_FLAGS)
 
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 ${FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG
+    ${JOINED_FLAGS}
+    CACHE STRING "Flags used by the C++ compiler during Debug builds."
+    FORCE
+    )
+
+set(CMAKE_C_FLAGS_DEBUG
+    ${JOINED_FLAGS}
+    CACHE STRING "Flags used by the C compiler during Debug builds."
+    FORCE
+    )
+
+mark_as_advanced(
+    CMAKE_C_FLAGS_DEBUG
+    CMAKE_CXX_FLAGS_DEBUG
+)

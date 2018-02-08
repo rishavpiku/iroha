@@ -1,12 +1,8 @@
-# TODO: we need to look at this script, maybe it can be useful
 # https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake
 
-
-# append coverage flags
-set(CMAKE_CXX_FLAGS           "--coverage ${CMAKE_CXX_FLAGS}")
-set(CMAKE_C_FLAGS             "--coverage ${CMAKE_C_FLAGS}")
-set(CMAKE_SHARED_LINKER_FLAGS "--coverage ${CMAKE_SHARED_LINKER_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS    "--coverage ${CMAKE_EXE_LINKER_FLAGS}")
+if(CMAKE_BUILD_TYPE NOT STREQUAL Coverage)
+  message(WARNING "Current build type is ${CMAKE_BUILD_TYPE}, but Coverage is recommended to collect better coverage")
+endif()
 
 # gcovr performs coverage analysis and saves result in build/gcovr.xml
 # expects to receive array of paths to analyzed directories relative to project root

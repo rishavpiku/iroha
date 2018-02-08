@@ -2,14 +2,23 @@
 ###     CONFIGURATIONS     ###
 ##############################
 include(FeatureSummary)
+
 # cmake policies
 include(cmake/policies.cmake)
+
 # user functions
 include(cmake/functions.cmake)
-# all 3rd-party dependencies
-include(cmake/dependencies.cmake)
+
 # flags and config options
 include(cmake/config/all.cmake)
+include(cmake/config/release.cmake)
+include(cmake/config/debug.cmake)
+include(cmake/config/coverage.cmake)
+
+# all 3rd-party dependencies
+# should be last in this section
+include(cmake/dependencies.cmake)
+
 
 
 ##############################

@@ -1,4 +1,11 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.10)
+
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK    "${CCACHE_PROGRAM}")
+  message(STATUS "ccache enabled (${CCACHE_PROGRAM})")
+endif()
 
 ##################################
 ## setup Hunter and its modules ##
@@ -17,7 +24,7 @@ set(
     "Hunter cache servers"
 )
 
-# enable this option to use binary cache
+# enable this option to upload your binary cache
 # GITHUB_USER_PASSWORD=<github_personal_token> environment variable must be set
 option(HUNTER_RUN_UPLOAD "Upload cache binaries" OFF)
 
@@ -28,6 +35,16 @@ set(
     FILEPATH
     "Hunter passwords"
 )
+
+#########################
+## configuration types ##
+#########################
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Coverage" CACHE STRING "" FORCE)
+
+# we do not gather coverage information within dependencies, so do not need
+# Coverage configuration type here
+set(HUNTER_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
+
 
 include(HunterGate)
 HunterGate(
@@ -60,10 +77,6 @@ option(SWIG_JAVA    "Generate Swig Java bindings"    OFF)
 option(SWIG_CSHARP  "Generate Swig C# bindings"      OFF)
 option(SHARED_MODEL_DISABLE_COMPATIBILITY "Disable backward compatibility in shared model" OFF)
 
-if (NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Debug)
-  message(STATUS "Default build type is Debug")
-endif()
 
 if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
   message(STATUS "Packaging enabled: forcing non-packaging options to OFF")
@@ -98,7 +111,8 @@ include_directories(
   ${IROHA_SCHEMA_DIR}
 )
 
-# must be here
+# main setup stage
+# must be at this place
 include(cmake/setup.cmake)
 
 if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
