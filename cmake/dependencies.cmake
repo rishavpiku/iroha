@@ -57,6 +57,8 @@ find_package(optional)
 #           pq           #
 ##########################
 find_package(pq)
+#hunter_add_package(PostgreSQL)
+#find_package(PostgreSQL 9.5 REQUIRED)
 
 ##########################a
 #          pqxx          #
@@ -66,7 +68,9 @@ find_package(pqxx)
 ################################
 #            gflags            #
 ################################
-find_package(gflags)
+hunter_add_package(gflags)
+find_package(gflags 2.1 CONFIG REQUIRED)
+#find_package(gflags)
 
 ##########################
 #        rx c++          #
@@ -81,22 +85,18 @@ find_package(tbb)
 ##########################
 #         boost          #
 ##########################
-#find_package(Boost 1.65.0 REQUIRED
-#    COMPONENTS
-#    filesystem
-#    system
-#    )
-if(NOT Boost_FOUND)
-  hunter_add_package(Boost COMPONENTS
-      filesystem
-      system
-      )
-  find_package(Boost 1.65.0 CONFIG REQUIRED
-      COMPONENTS
-      filesystem
-      system
-      )
-endif()
+set(BOOST_COMPONENTS
+    filesystem
+    system
+    )
+set(BOOST_VERSION 1.65.1)
+hunter_add_package(Boost COMPONENTS
+    ${BOOST_COMPONENTS}
+    )
+find_package(Boost ${BOOST_VERSION} CONFIG REQUIRED
+    COMPONENTS
+    ${BOOST_COMPONENTS}
+    )
 
 
 #add_library(boost INTERFACE IMPORTED)
@@ -104,12 +104,12 @@ endif()
 #    INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS}
 #    INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
 #    )
-
-if(ENABLE_LIBS_PACKAGING)
-  foreach (library ${Boost_LIBRARIES})
-    add_install_step_for_lib(${library})
-  endforeach(library)
-endif()
+#
+#if(ENABLE_LIBS_PACKAGING)
+#  foreach (library ${Boost_LIBRARIES})
+#    add_install_step_for_lib(${library})
+#  endforeach(library)
+#endif()
 
 ##########################
 #       benchmark        #

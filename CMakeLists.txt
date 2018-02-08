@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.5.1)
 
+##################################
+## setup Hunter and its modules ##
+##################################
+
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-SET(HUNTER_STATUS_PRINT ON CACHE BOOL "Verbose info")
-SET(HUNTER_STATUS_DEBUG ON CACHE BOOL "Debug info")
+SET(HUNTER_STATUS_PRINT ON  CACHE BOOL "Verbose info")
+SET(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info")
 
 # hunter binary cache server
 set(
@@ -14,6 +18,7 @@ set(
 )
 
 # enable this option to use binary cache
+# GITHUB_USER_PASSWORD=<github_personal_token> environment variable must be set
 option(HUNTER_RUN_UPLOAD "Upload cache binaries" OFF)
 
 set(
@@ -26,10 +31,14 @@ set(
 
 include(HunterGate)
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.20.0.tar.gz"
-    SHA1 "e94556ed41e5432997450bca7232db72a3b0d5ef"
+    URL "https://github.com/ruslo/hunter/archive/v0.20.2.tar.gz"
+    SHA1 "c9780566995579d7abcb5167a57e652585cbd4bd"
     FILEPATH ${CMAKE_SOURCE_DIR}/cmake/hunter-config.cmake
 )
+
+######################
+## project settings ##
+######################
 
 PROJECT(
     iroha
