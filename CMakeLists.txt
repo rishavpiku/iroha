@@ -2,17 +2,27 @@ cmake_minimum_required(VERSION 3.5.1)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 SET(HUNTER_STATUS_PRINT ON CACHE BOOL "Verbose info")
-SET(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info")
+SET(HUNTER_STATUS_DEBUG ON CACHE BOOL "Debug info")
 
-# TODO:
-## hunter binary cache server
-#set(
-#    HUNTER_CACHE_SERVERS
-#    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
-#    CACHE
-#    STRING
-#    "Hunter cache servers"
-#)
+# hunter binary cache server
+set(
+    HUNTER_CACHE_SERVERS
+    "https://github.com/soramitsu/hunter-binary-cache;https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
+    CACHE
+    STRING
+    "Hunter cache servers"
+)
+
+# enable this option to use binary cache
+option(HUNTER_RUN_UPLOAD "Upload cache binaries" OFF)
+
+set(
+    HUNTER_PASSWORDS_PATH
+    "${CMAKE_SOURCE_DIR}/cmake/hunter-binary-cache.cmake"
+    CACHE
+    FILEPATH
+    "Hunter passwords"
+)
 
 include(HunterGate)
 HunterGate(

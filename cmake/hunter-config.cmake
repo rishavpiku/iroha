@@ -31,6 +31,13 @@ hunter_config(RapidJSON
       -DRAPIDJSON_BUILD_UBSAN=OFF
     )
 
+# boost
+hunter_config(Boost
+    VERSION
+      1.65.1
+    CMAKE_ARGS
+
+    )
 
 ## Protobuf
 ## TODO: latest releast is 3.5, we can hunterize it

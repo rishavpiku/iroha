@@ -15,7 +15,7 @@ find_package(Threads REQUIRED)
 ##########################
 #         gtest          #
 ##########################
-# testing is an option. Look at the main CMakeLists.txt for details.
+# testing is an option. Look at the main policies.cmake for details.
 if (TESTING)
   hunter_add_package(GTest)
 
@@ -81,16 +81,29 @@ find_package(tbb)
 ##########################
 #         boost          #
 ##########################
-find_package(Boost 1.65.0 REQUIRED
-    COMPONENTS
-    filesystem
-    system
-    )
-add_library(boost INTERFACE IMPORTED)
-set_target_properties(boost PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS}
-    INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
-    )
+#find_package(Boost 1.65.0 REQUIRED
+#    COMPONENTS
+#    filesystem
+#    system
+#    )
+if(NOT Boost_FOUND)
+  hunter_add_package(Boost COMPONENTS
+      filesystem
+      system
+      )
+  find_package(Boost 1.65.0 CONFIG REQUIRED
+      COMPONENTS
+      filesystem
+      system
+      )
+endif()
+
+
+#add_library(boost INTERFACE IMPORTED)
+#set_target_properties(boost PROPERTIES
+#    INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS}
+#    INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
+#    )
 
 if(ENABLE_LIBS_PACKAGING)
   foreach (library ${Boost_LIBRARIES})
