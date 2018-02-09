@@ -27,18 +27,20 @@ endif ()
 #         speedlog          #
 #############################
 hunter_add_package(spdlog)
-# TODO: I can not specify version, consider creating own package
+# TODO: create package with 0.16+
 find_package(spdlog CONFIG REQUIRED)
 
 ################################
 #           protobuf           #
 ################################
+# TODO: hunterize protobuf
 option(FIND_PROTOBUF "Try to find protobuf in system" ON)
 find_package(protobuf)
 
 #########################
 #         gRPC          #
 #########################
+# TODO: hunterize grpc
 option(FIND_GRPC "Try to find gRPC in system" ON)
 find_package(grpc)
 
@@ -51,11 +53,13 @@ find_package(RapidJSON 1.1.0 CONFIG REQUIRED)
 #############################
 #         optional          #
 #############################
+# TODO: hunterize optional
 find_package(optional)
 
 ##########################
 #           pq           #
 ##########################
+# TODO: hunterize pq + pqxx
 find_package(pq)
 #hunter_add_package(PostgreSQL)
 #find_package(PostgreSQL 9.5 REQUIRED)
@@ -68,8 +72,9 @@ find_package(pqxx)
 ################################
 #            gflags            #
 ################################
+# TODO: check that gflags works on all OS
 hunter_add_package(gflags)
-find_package(gflags 2.1 CONFIG REQUIRED)
+find_package(gflags 2.2 CONFIG REQUIRED)
 #find_package(gflags)
 
 ##########################

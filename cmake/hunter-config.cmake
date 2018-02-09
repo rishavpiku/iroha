@@ -46,9 +46,6 @@ hunter_config(PostgreSQL
     EXTRA_FLAGS=--without-readline
   )
 
-## TODO: gflags does not work due to error, when hunter does make install,
-# gflags tries to install some file in ~/.cmake/<some path>, and ~/.cmake
-# does not exist
 
 # gflags
 if(BUILD_SHARED_LIBS)

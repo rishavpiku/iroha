@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.7)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -10,10 +10,9 @@ endif()
 ##################################
 ## setup Hunter and its modules ##
 ##################################
-
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 SET(HUNTER_STATUS_PRINT ON  CACHE BOOL "Verbose info")
-SET(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info")
+SET(HUNTER_STATUS_DEBUG OFF CACHE BOOL "Debug info"  )
 
 # hunter binary cache server
 set(
@@ -25,8 +24,18 @@ set(
 )
 
 # enable this option to upload your binary cache
+# GITHUB_USER=<github_user> environment variable must be set
 # GITHUB_USER_PASSWORD=<github_personal_token> environment variable must be set
 option(HUNTER_RUN_UPLOAD "Upload cache binaries" OFF)
+if(HUNTER_RUN_UPLOAD)
+  if(NOT DEFINED "ENV{GITHUB_USER}")
+    message(FATAL_ERROR "HUNTER_RUN_UPLOAD=ON, but GITHUB_USER env variable is empty")
+  endif()
+  if(NOT DEFINED "ENV{GITHUB_USER_PASSWORD}")
+    message(FATAL_ERROR "HUNTER_RUN_UPLOAD=ON, but GITHUB_USER_PASSWORD env variable is empty, set to personal access token from github")
+  endif()
+endif()
+
 
 set(
     HUNTER_PASSWORDS_PATH
@@ -41,15 +50,15 @@ set(
 #########################
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Coverage" CACHE STRING "" FORCE)
 
-# we do not gather coverage information within dependencies, so do not need
+# we do not gather coverage information for dependencies, so we do not need
 # Coverage configuration type here
 set(HUNTER_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
 
 
 include(HunterGate)
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.20.2.tar.gz"
-    SHA1 "c9780566995579d7abcb5167a57e652585cbd4bd"
+    URL "https://github.com/ruslo/hunter/archive/v0.20.3.tar.gz"
+    SHA1 "32f280cd3883f25446a578a39bfab702d6b1c60c"
     FILEPATH ${CMAKE_SOURCE_DIR}/cmake/hunter-config.cmake
 )
 
