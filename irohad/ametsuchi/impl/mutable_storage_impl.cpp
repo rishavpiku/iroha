@@ -27,7 +27,7 @@
 namespace iroha {
   namespace ametsuchi {
     MutableStorageImpl::MutableStorageImpl(
-        hash256_t top_hash,
+        shared_model::crypto::Hash top_hash,
         std::unique_ptr<pqxx::lazyconnection> connection,
         std::unique_ptr<pqxx::nontransaction> transaction,
         std::shared_ptr<model::CommandExecutorFactory> command_executors)
@@ -44,14 +44,16 @@ namespace iroha {
     }
 
     bool MutableStorageImpl::apply(
-        const model::Block &block,
-        std::function<bool(const model::Block &, WsvQuery &, const hash256_t &)>
-            function) {
+        const shared_model::interface::Block &block,
+        std::function<bool(const shared_model::interface::Block &,
+                           WsvQuery &,
+                           const shared_model::crypto::Hash &)> function) {
       auto execute_transaction = [this](auto &transaction) {
         auto execute_command = [this, &transaction](auto command) {
+          auto old_command = std::shared_ptr<model::Command>(command->makeOldModel());
           auto result =
-              command_executors_->getCommandExecutor(command)->execute(
-                  *command, *wsv_, *executor_, transaction.creator_account_id);
+              command_executors_->getCommandExecutor(old_command)->execute(
+                  *old_command, *wsv_, *executor_, transaction->creatorAccountId());
           return result.match(
               [](expected::Value<void> v) { return true; },
               [&](expected::Error<iroha::model::ExecutionError> e) {
@@ -59,22 +61,26 @@ namespace iroha {
                 return false;
               });
         };
-        return std::all_of(transaction.commands.begin(),
-                           transaction.commands.end(),
+        return std::all_of(transaction->commands().begin(),
+                           transaction->commands().end(),
                            execute_command);
       };
 
       transaction_->exec("SAVEPOINT savepoint_;");
       auto result = function(block, *wsv_, top_hash_)
-          and std::all_of(block.transactions.begin(),
-                          block.transactions.end(),
+          and std::all_of(block.transactions().begin(),
+                          block.transactions().end(),
                           execute_transaction);
 
       if (result) {
-        block_store_.insert(std::make_pair(block.height, block));
-        block_index_->index(block);
+        block_store_.insert(std::make_pair(
+            block.height(),
+            std::shared_ptr<shared_model::interface::Block>(block.copy())));
+        auto old_block = block.makeOldModel();
+        block_index_->index(*old_block);
+        delete old_block;
 
-        top_hash_ = block.hash;
+        top_hash_ = block.hash();
         transaction_->exec("RELEASE SAVEPOINT savepoint_;");
       } else {
         transaction_->exec("ROLLBACK TO SAVEPOINT savepoint_;");
