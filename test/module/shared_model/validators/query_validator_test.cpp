@@ -18,6 +18,7 @@
 #include "module/shared_model/validators/validators_fixture.hpp"
 
 #include "builders/protobuf/queries.hpp"
+#include "validators/query_validator.hpp"
 
 class QueryValidatorTest : public ValidatorsTest {
  public:

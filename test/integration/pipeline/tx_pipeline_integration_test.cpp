@@ -29,14 +29,17 @@
 using namespace iroha::model::generators;
 using namespace iroha::model::converters;
 
+#define INTERNAL_PORT 10002
+
 // TODO: refactor services to allow dynamic port binding IR-741
 class TxPipelineIntegrationTest : public TxPipelineIntegrationTestFixture {
  public:
   void SetUp() override {
     iroha::ametsuchi::AmetsuchiTest::SetUp();
 
+    std::string address = "0.0.0.0" + std::to_string(INTERNAL_PORT);
     auto genesis_tx =
-        TransactionGenerator().generateGenesisTransaction(0, {"0.0.0.0:10001"});
+        TransactionGenerator().generateGenesisTransaction(0, {address});
     genesis_block =
         iroha::model::generators::BlockGenerator().generateGenesisBlock(
             0, {genesis_tx});
@@ -48,7 +51,7 @@ class TxPipelineIntegrationTest : public TxPipelineIntegrationTestFixture {
         block_store_path,
         pgopt_,
         0,
-        10001,
+        INTERNAL_PORT,
         10,
         5000ms,
         5000ms,
@@ -86,7 +89,7 @@ TEST_F(TxPipelineIntegrationTest, TxPipelineTest) {
       iroha::model::generators::CommandGenerator().generateAddAssetQuantity(
           "admin@test",
           "coin#test",
-          iroha::Amount().createFromString("20.00").value());
+          iroha::Amount::createFromString("20.00").value());
 
   // generate test transaction
   auto tx =
@@ -114,7 +117,7 @@ TEST_F(TxPipelineIntegrationTest, GetTransactionsTest) {
       iroha::model::generators::CommandGenerator().generateAddAssetQuantity(
           CREATOR_ACCOUNT_ID,
           "coin#test",
-          iroha::Amount().createFromString("20.00").value());
+          iroha::Amount::createFromString("20.00").value());
   auto given_tx =
       iroha::model::generators::TransactionGenerator().generateTransaction(
           CREATOR_ACCOUNT_ID, 1, {cmd});
@@ -158,15 +161,15 @@ const shared_model::crypto::Keypair kAdminKeypair(
  * @then query response is ErrorResponse with STATEFUL_INVALID reason
  */
 TEST(PipelineIntegrationTest, SendQuery) {
+  auto keypair =
+      shared_model::crypto::DefaultCryptoAlgorithmType::generateKeypair();
   auto query = shared_model::proto::QueryBuilder()
                    .createdTime(iroha::time::now())
                    .creatorAccountId(kUser)
                    .queryCounter(1)
                    .getAccount(kUser)
                    .build()
-                   .signAndAddSignature(
-                       shared_model::crypto::DefaultCryptoAlgorithmType::
-                           generateKeypair());
+                   .signAndAddSignature(keypair);
 
   auto check = [](auto &status) {
     using ExpectedResponseType = shared_model::detail::PolymorphicWrapper<

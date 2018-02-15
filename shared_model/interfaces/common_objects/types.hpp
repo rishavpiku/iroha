@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include "cryptography/public_key.hpp"
 #include "interfaces/common_objects/signature.hpp"
@@ -28,6 +29,10 @@
 namespace shared_model {
 
   namespace interface {
+
+    class Transaction;
+    class SignableHash;
+
     namespace types {
       /// Type of account id
       using AccountIdType = std::string;
@@ -54,6 +59,19 @@ namespace shared_model {
       using QuorumType = uint32_t;
       /// Type of transaction signature
       using SignatureType = detail::PolymorphicWrapper<Signature>;
+      /**
+       * Type of set of signatures
+       *
+       * Note: we can't use const SignatureType due to unordered_set
+       * limitations: it requires to have write access for elements for some
+       * internal operations.
+       */
+      using SignatureSetType =
+          std::unordered_set<types::SignatureType, SignableHash>;
+      /// Type of a single Transaction
+      using TransactionType = detail::PolymorphicWrapper<Transaction>;
+      /// Type of transactions' collection
+      using TransactionsCollectionType = std::vector<TransactionType>;
       /// Type of timestamp
       using TimestampType = uint64_t;
       /// Type of peer address

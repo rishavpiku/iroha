@@ -74,6 +74,52 @@ namespace shared_model {
         reasons_map_.insert(std::move(reasons));
       }
 
+      void addReason(const ReasonsGroupName &type,
+                     const GroupedReasons &group) {
+        // try to find the type
+        auto r = reasons_map_.find(type);
+        if (r != reasons_map_.end()) {
+          // found group
+          for (const auto &item : group) {
+            // append reasons to group's array one-by-one
+            reasons_map_[type].push_back(item);
+          }
+        } else {
+          // group is not found, then create new group
+          addReason({type, group});
+        }
+      }
+
+      bool hasReason(const ReasonsGroupName &type) {
+        auto it = reasons_map_.find(type);
+        // true if has reason type
+        return it != reasons_map_.end();
+      }
+
+      void clear() {
+        reasons_map_.clear();
+      }
+
+      /**
+       * Merge two Answers - this and other
+       */
+      void merge(const Answer &other) {
+        for (const auto &e : other.reasons_map_) {
+          auto &key = e.first;
+          auto &val = e.second;
+
+          auto it = reasons_map_.find(key);
+          if (it != reasons_map_.end()) {
+            // key found
+            for (const auto &v : val) {
+              reasons_map_[key].push_back(v);
+            }
+          } else {
+            reasons_map_[key] = val;
+          }
+        }
+      }
+
       std::map<ReasonsGroupName, GroupedReasons> getReasonsMap() {
         return reasons_map_;
       };

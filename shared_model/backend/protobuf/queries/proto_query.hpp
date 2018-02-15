@@ -26,6 +26,7 @@
 #include "queries.pb.h"
 #include "utils/lazy_initializer.hpp"
 #include "utils/variant_deserializer.hpp"
+#include "interfaces/common_objects/types.hpp"
 
 #include "backend/protobuf/queries/proto_get_account.hpp"
 #include "backend/protobuf/queries/proto_get_account_asset_transactions.hpp"
@@ -59,6 +60,8 @@ shared_model::interface::Query::QueryVariantType loadQuery(Archive &&ar) {
 
 namespace shared_model {
   namespace proto {
+    using interface::types::SignatureSetType;
+
     class Query FINAL : public CopyableProto<interface::Query,
                                              iroha::protocol::Query,
                                              Query> {
@@ -127,7 +130,7 @@ namespace shared_model {
       }
 
       // ------------------------| Signable override  |-------------------------
-      const Query::SignatureSetType &signatures() const override {
+      const SignatureSetType &signatures() const override {
         return *signatures_;
       }
 

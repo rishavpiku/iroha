@@ -20,6 +20,8 @@
 
 #include <gmock/gmock.h>
 #include "interfaces/transaction.hpp"
+#include "interfaces/queries/query.hpp"
+#include "validators/answer.hpp"
 
 namespace shared_model {
   namespace validation {

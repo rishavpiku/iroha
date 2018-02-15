@@ -77,11 +77,12 @@ class TransportBuilderTest : public ::testing::Test {
   }
 
   auto createBlock() {
+    crypto::Hash hash(std::string(32, 'a'));
     return TestBlockBuilder()
         .transactions(std::vector<Transaction>({createTransaction()}))
         .txNumber(1)
         .height(1)
-        .prevHash(crypto::Hash("asd"))
+        .prevHash(crypto::Hash(hash))
         .createdTime(created_time)
         .build();
   }

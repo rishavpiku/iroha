@@ -19,9 +19,22 @@
 #define IROHA_TEST_BLOCK_BUILDER_HPP
 
 #include "builders/protobuf/builder_templates/block_template.hpp"
+#include "interfaces/iroha_internal/block.hpp"
+#include "utils/polymorphic_wrapper.hpp"
+#include "validators/answer.hpp"
 
 using namespace shared_model::proto;
 using namespace shared_model::validation;
+
+class NoValidation {
+ public:
+  using wrappedBlock =
+      shared_model::detail::PolymorphicWrapper<shared_model::interface::Block>;
+
+  Answer validate(wrappedBlock) const {
+    return Answer();
+  }
+};
 
 /**
  * Builder alias, to build shared model proto block object avoiding validation
@@ -29,6 +42,6 @@ using namespace shared_model::validation;
  */
 using TestBlockBuilder =
     TemplateBlockBuilder<(1 << TemplateBlockBuilder<>::total) - 1,
-                         DefaultBlockValidator,
+                         NoValidation,
                          Block>;
 #endif  // IROHA_TEST_BLOCK_BUILDER_HPP

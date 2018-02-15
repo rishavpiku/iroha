@@ -53,16 +53,10 @@ namespace shared_model {
        */
       virtual TransactionsNumberType txsNumber() const = 0;
 
-      /// Type of a single Transaction
-      using TransactionType = detail::PolymorphicWrapper<Transaction>;
-
-      /// Type of transactions' collection
-      using TransactionsCollectionType = std::vector<TransactionType>;
-
       /**
        * @return collection of transactions
        */
-      virtual const TransactionsCollectionType &transactions() const = 0;
+      virtual const types::TransactionsCollectionType &transactions() const = 0;
 
 #ifndef DISABLE_BACKWARD
       iroha::model::Block *makeOldModel() const override {

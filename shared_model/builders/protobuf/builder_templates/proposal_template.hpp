@@ -21,6 +21,7 @@
 #include "backend/protobuf/proposal.hpp"
 #include "interfaces/common_objects/types.hpp"
 #include "validators/default_validator.hpp"
+#include "validators/internal_validator.hpp"
 
 #include "proposal.pb.h"
 

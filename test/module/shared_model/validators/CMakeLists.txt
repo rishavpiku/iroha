@@ -38,3 +38,10 @@ target_link_libraries(field_validator_test
     shared_model_proto_backend
     shared_model_stateless_validation
     )
+
+
+addtest(internal_validator_test internal_validator_test.cpp)
+target_link_libraries(internal_validator_test
+    shared_model_stateless_validation
+    shared_model_proto_builders
+    )

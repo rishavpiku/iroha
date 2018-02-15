@@ -18,23 +18,35 @@
 #ifndef IROHA_SHARED_MODEL_DEFAULT_VALIDATOR_HPP
 #define IROHA_SHARED_MODEL_DEFAULT_VALIDATOR_HPP
 
-#include "validators/block_validator.hpp"
-#include "validators/field_validator.hpp"
-#include "validators/proposal_validator.hpp"
-#include "validators/query_validator.hpp"
-#include "validators/transaction_validator.hpp"
-
 namespace shared_model {
   namespace validation {
+
+    class FieldValidator;
+
+    template <typename T>
+    class CommandValidatorVisitor;
+
+    template <typename A, typename B>
+    class TransactionValidator;
+
+    template <typename T>
+    class QueryValidatorVisitor;
+
+    template <typename A, typename B>
+    class QueryValidator;
+
+    class InternalValidator;
+
     using DefaultTransactionValidator =
         TransactionValidator<FieldValidator,
                              CommandValidatorVisitor<FieldValidator>>;
     using DefaultQueryValidator =
         QueryValidator<FieldValidator, QueryValidatorVisitor<FieldValidator>>;
 
-    using DefaultProposalValidator = ProposalValidator;
+    using DefaultProposalValidator = InternalValidator;
 
-    using DefaultBlockValidator = BlockValidator;
+    using DefaultBlockValidator = InternalValidator;
+
   }  // namespace validation
 }  // namespace shared_model
 

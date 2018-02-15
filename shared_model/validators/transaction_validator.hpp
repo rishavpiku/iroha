@@ -23,6 +23,7 @@
 
 #include "interfaces/transaction.hpp"
 #include "validators/answer.hpp"
+#include "validators/field_validator.hpp"
 
 namespace shared_model {
   namespace validation {
@@ -258,25 +259,38 @@ namespace shared_model {
        */
       Answer validate(
           detail::PolymorphicWrapper<interface::Transaction> tx) const {
+        return validate(*tx.get());
+      }
+
+      /**
+       * Applies validation to given transaction
+       * @param tx - transaction to validate
+       * @return Answer containing found error if any
+       */
+      Answer validate(const interface::Transaction &tx) const {
         Answer answer;
+
+        // TODO(@warchant): IR-979 refactor with "add reason" key-value style as in
+        // block validator, move definition to cpp
+
         std::string tx_reason_name = "Transaction";
         ReasonsGroupType tx_reason(tx_reason_name, GroupedReasons());
 
-        if (tx->commands().empty()) {
-          tx_reason.second.push_back(
+        if (tx.commands().empty()) {
+          tx_reason.second.emplace_back(
               "Transaction should contain at least one command");
         }
 
         field_validator_.validateCreatorAccountId(tx_reason,
-                                                  tx->creatorAccountId());
-        field_validator_.validateCreatedTime(tx_reason, tx->createdTime());
-        field_validator_.validateCounter(tx_reason, tx->transactionCounter());
+                                                  tx.creatorAccountId());
+        field_validator_.validateCreatedTime(tx_reason, tx.createdTime());
+        field_validator_.validateCounter(tx_reason, tx.transactionCounter());
 
         if (not tx_reason.second.empty()) {
           answer.addReason(std::move(tx_reason));
         }
 
-        for (const auto &command : tx->commands()) {
+        for (const auto &command : tx.commands()) {
           auto reason =
               boost::apply_visitor(command_validator_, command->get());
           if (not reason.second.empty()) {

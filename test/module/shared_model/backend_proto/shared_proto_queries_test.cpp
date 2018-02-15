@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-#include "backend/protobuf/queries/proto_query.hpp"
-#include "builders/protobuf/queries.hpp"
-
 #include <gtest/gtest.h>
 
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/irange.hpp>
+#include "backend/protobuf/queries/proto_query.hpp"
+#include "builders/protobuf/queries.hpp"
+#include "datetime/time.hpp"
 
 /**
  * For each protobuf query type

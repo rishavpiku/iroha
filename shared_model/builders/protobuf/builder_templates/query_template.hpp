@@ -24,11 +24,13 @@
 #include "interfaces/transaction.hpp"
 #include "queries.pb.h"
 #include "validators/default_validator.hpp"
+#include "validators/query_validator.hpp"
+#include "validators/field_validator.hpp"
 
 namespace shared_model {
   namespace proto {
 
-  /**
+    /**
      * Template query builder for creating new types of query builders by
      * means of replacing template parameters
      * @tparam S -- field counter for checking that all required fields are set

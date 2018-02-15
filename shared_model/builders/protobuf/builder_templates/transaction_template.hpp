@@ -31,6 +31,7 @@
 #include "builders/protobuf/unsigned_proto.hpp"
 #include "interfaces/common_objects/types.hpp"
 #include "validators/default_validator.hpp"
+#include "validators/transaction_validator.hpp"
 
 namespace shared_model {
   namespace proto {

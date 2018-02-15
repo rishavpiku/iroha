@@ -26,9 +26,12 @@
 #include "backend/protobuf/common_objects/signature.hpp"
 #include "block.pb.h"
 #include "utils/lazy_initializer.hpp"
+#include "interfaces/common_objects/types.hpp"
 
 namespace shared_model {
   namespace proto {
+    using interface::types::SignatureSetType;
+
     class Transaction FINAL : public CopyableProto<interface::Transaction,
                                                    iroha::protocol::Transaction,
                                                    Transaction> {
@@ -88,7 +91,7 @@ namespace shared_model {
         return *txhash_;
       }
 
-      const Transaction::SignatureSetType &signatures() const override {
+      const SignatureSetType &signatures() const override {
         return *signatures_;
       }
 

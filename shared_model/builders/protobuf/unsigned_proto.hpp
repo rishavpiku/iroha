@@ -64,6 +64,10 @@ namespace shared_model {
         return unsigned_.hash();
       }
 
+      const T &get() const {
+        return unsigned_;
+      }
+
      private:
       T unsigned_;
     };

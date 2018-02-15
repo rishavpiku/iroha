@@ -28,6 +28,7 @@
 #include "model/block.hpp"
 
 #include "block.pb.h"
+#include "interfaces/common_objects/types.hpp"
 #include "utils/lazy_initializer.hpp"
 
 namespace shared_model {
@@ -71,7 +72,8 @@ namespace shared_model {
 
       Block(Block &&o) noexcept : Block(std::move(o.proto_)) {}
 
-      const TransactionsCollectionType &transactions() const override {
+      const interface::types::TransactionsCollectionType &transactions()
+          const override {
         return *transactions_;
       }
 
