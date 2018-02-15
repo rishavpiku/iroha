@@ -25,7 +25,12 @@ limitations under the License.
 #include "model/converters/pb_query_response_factory.hpp"
 #include "torii/processor/query_processor.hpp"
 
+#include "cache/cache.hpp"
 #include "logger/logger.hpp"
+
+#include <validators/default_validator.hpp>
+#include "backend/protobuf/queries/proto_query.hpp"
+#include "builders/protobuf/transport_builder.hpp"
 
 namespace torii {
   /**
@@ -63,11 +68,10 @@ namespace torii {
         pb_query_response_factory_;
     std::shared_ptr<iroha::torii::QueryProcessor> query_processor_;
 
-    std::unordered_map<std::string, iroha::protocol::QueryResponse &>
-        handler_map_;
-
-    std::unordered_map<std::string, iroha::protocol::QueryResponse>
-        old_queries_;
+    iroha::cache::Cache<shared_model::crypto::Hash,
+                        iroha::protocol::QueryResponse,
+                        shared_model::crypto::Hash::Hasher>
+        cache_;
 
     logger::Logger log_;
   };
