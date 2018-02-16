@@ -66,11 +66,14 @@ namespace shared_model {
       OldModelType *makeOldModel() const override {
         iroha::model::Signature *oldStyleSignature =
             new iroha::model::Signature();
-        oldStyleSignature->signature = *iroha::hexstringToArray<
-            iroha::model::Signature::SignatureType::size()>(signedData().hex());
-        oldStyleSignature->pubkey =
-            *iroha::hexstringToArray<iroha::model::Signature::KeyType::size()>(
-                publicKey().hex());
+        iroha::hexstringToArray<
+            iroha::model::Signature::SignatureType::size()>(signedData().hex()) | [oldStyleSignature](const auto& blob){
+          oldStyleSignature->signature = blob;
+        };
+        iroha::hexstringToArray<iroha::model::Signature::KeyType::size()>(
+            publicKey().hex()) | [oldStyleSignature](const auto& blob){
+          oldStyleSignature->pubkey = blob;
+        };
         return oldStyleSignature;
       }
 

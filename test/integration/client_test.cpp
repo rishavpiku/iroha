@@ -23,6 +23,7 @@
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "module/irohad/validation/validation_mocks.hpp"
+#include "module/shared_model/builders/protobuf/test_query_builder.hpp"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
 
 #include "client.hpp"
@@ -37,6 +38,7 @@
 #include "model/converters/json_transaction_factory.hpp"
 #include "model/permissions.hpp"
 
+#include "builders/protobuf/queries.hpp"
 #include "builders/protobuf/transaction.hpp"
 
 constexpr const char *Ip = "0.0.0.0";
@@ -212,28 +214,16 @@ TEST_F(ClientServerTest, SendQueryWhenInvalidJson) {
 
 TEST_F(ClientServerTest, SendQueryWhenStatelessInvalid) {
   iroha_cli::CliClient client(Ip, Port);
-  EXPECT_CALL(*svMock, validate(A<const iroha::model::Query &>()))
-      .WillOnce(Return(false));
 
-  auto json_query =
-      R"({"signature": {
-            "pubkey":
-              "2323232323232323232323232323232323232323232323232323232323232323",
-            "signature":
-              "23232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323"
-          },
-          "created_ts": 0,
-          "creator_account_id": "123",
-          "query_counter": 0,
-          "query_type": "GetAccount",
-          "account_id": "test@test"
-        })";
+  shared_model::proto::Query query = TestQueryBuilder()
+                                         .createdTime(0)
+                                         .creatorAccountId("123")
+                                         .getAccount("asd")
+                                         .build();
+  auto proto_query = query.getTransport();
 
-  JsonQueryFactory queryFactory;
-  auto model_query = queryFactory.deserialize(json_query);
-  ASSERT_TRUE(model_query.has_value());
-
-  auto res = client.sendQuery(model_query.value());
+  auto res = client.sendQuery(
+      std::shared_ptr<iroha::model::Query>(query.makeOldModel()));
   ASSERT_TRUE(res.status.ok());
   ASSERT_TRUE(res.answer.has_error_response());
   ASSERT_EQ(res.answer.error_response().reason(),
@@ -279,8 +269,18 @@ TEST_F(ClientServerTest, SendQueryWhenValid) {
   JsonQueryFactory queryFactory;
   auto model_query = queryFactory.deserialize(json_query);
   ASSERT_TRUE(model_query.has_value());
+  auto query = QueryBuilder()
+                   .createdTime(iroha::time::now())
+                   .creatorAccountId("admin@test")
+                   .queryCounter(1)
+                   .getAccount("test@test")
+                   .build()
+                   .signAndAddSignature(
+                       shared_model::crypto::DefaultCryptoAlgorithmType::
+                           generateKeypair());
 
-  auto res = client.sendQuery(model_query.value());
+  auto res = client.sendQuery(
+      std::shared_ptr<iroha::model::Query>(query.makeOldModel()));
   ASSERT_EQ(res.answer.account_response().account().account_id(), "test@test");
 }
 

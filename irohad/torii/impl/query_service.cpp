@@ -18,6 +18,7 @@
 #include "torii/query_service.hpp"
 #include "common/types.hpp"
 #include "model/sha3_hash.hpp"
+#include "backend/protobuf/transaction_responses/proto_tx_response.hpp"
 
 namespace torii {
 
@@ -31,17 +32,20 @@ namespace torii {
         pb_query_response_factory_(pb_query_response_factory),
         query_processor_(query_processor) {
     // Subscribe on result from iroha
-    query_processor_->queryNotifier().subscribe([this](auto iroha_response) {
-      // Find client to respond
-      auto hash =
-          shared_model::crypto::Hash(iroha_response->query_hash.to_string());
-      auto res = cache_.findItem(hash);
-      // Serialize to proto an return to response
-      if (res) {
-        res = pb_query_response_factory_->serialize(iroha_response).value();
-        cache_.addItem(hash, res.value());
-      }
-    });
+    query_processor_->queryNotifier().subscribe(
+        [this](const auto &iroha_response) {
+          // Find client to respond
+          auto hash = shared_model::crypto::Hash(
+              iroha_response->query_hash.to_string());
+          auto res = cache_.findItem(hash);
+          // Serialize to proto an return to response
+          if (res) {
+            shared_model::proto::TransactionResponse model_response(iroha_response);
+//            res = pb_query_response_factory_->serialize(iroha_response).value();
+            std::unique_ptr<iro>model_response.makeOldModel()
+            cache_.addItem(hash, res.value());
+          }
+        });
   }
 
   void QueryService::Find(iroha::protocol::Query const &request,
@@ -61,8 +65,7 @@ namespace torii {
                 // Query was already processed
                 response.mutable_error_response()->set_reason(
                     iroha::protocol::ErrorResponse::STATELESS_INVALID);
-              }
-              else {
+              } else {
                 // Query - response relationship
                 cache_.addItem(hash, response);
                 // Send query to iroha
@@ -75,7 +78,7 @@ namespace torii {
             },
             [&response](const iroha::expected::Error<std::string> &error) {
               response.mutable_error_response()->set_reason(
-                  iroha::protocol::ErrorResponse::NOT_SUPPORTED);
+                  iroha::protocol::ErrorResponse::STATELESS_INVALID);
             });
   }
 

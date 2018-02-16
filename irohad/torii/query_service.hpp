@@ -69,7 +69,7 @@ namespace torii {
     std::shared_ptr<iroha::torii::QueryProcessor> query_processor_;
 
     iroha::cache::Cache<shared_model::crypto::Hash,
-                        iroha::protocol::QueryResponse,
+                        iroha::protocol::QueryResponse&,
                         shared_model::crypto::Hash::Hasher>
         cache_;
 
