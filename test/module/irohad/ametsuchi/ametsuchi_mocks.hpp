@@ -154,9 +154,9 @@ namespace iroha {
      public:
       MOCK_METHOD2(
           apply,
-          bool(const model::Block &,
+          bool(const shared_model::interface::Block &,
                std::function<bool(
-                   const model::Block &, WsvQuery &, const hash256_t &)>));
+              const shared_model::interface::Block &, WsvQuery &, const shared_model::crypto::Hash &)>));
     };
 
     /**
@@ -202,7 +202,7 @@ namespace iroha {
           createMutableStorage,
           expected::Result<std::unique_ptr<MutableStorage>, std::string>(void));
       MOCK_METHOD1(doCommit, void(MutableStorage *storage));
-      MOCK_METHOD1(insertBlock, bool(model::Block block));
+      MOCK_METHOD1(insertBlock, bool(const shared_model::interface::Block &block));
       MOCK_METHOD0(dropStorage, void(void));
 
       void commit(std::unique_ptr<MutableStorage> storage) override {

@@ -73,12 +73,18 @@ namespace iroha {
                           execute_transaction);
 
       if (result) {
+        log_->info("inserting block into map");
         block_store_.insert(std::make_pair(
             block.height(),
             std::shared_ptr<shared_model::interface::Block>(block.copy())));
+        log_->info("block inserted");
         auto old_block = block.makeOldModel();
+        log_->info("inserting block into index");
         block_index_->index(*old_block);
-        delete old_block;
+        log_->info("block inserted into index");
+//        delete old_block;
+
+        log_->info("block inserted");
 
         top_hash_ = block.hash();
         transaction_->exec("RELEASE SAVEPOINT savepoint_;");

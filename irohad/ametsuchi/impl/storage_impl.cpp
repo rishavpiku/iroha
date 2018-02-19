@@ -128,6 +128,7 @@ namespace iroha {
       storageResult.match(
           [&](expected::Value<std::unique_ptr<ametsuchi::MutableStorage>>
                   &storage) {
+            log_->info("mutable storage created");
             inserted =
                 storage.value->apply(block,
                                      [](const auto &current_block,

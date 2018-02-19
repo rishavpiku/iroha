@@ -21,6 +21,7 @@
 #include <cstdlib>
 
 #include "integration/pipeline/test_irohad.hpp"
+#include "backend/protobuf/from_old_model.hpp"
 
 namespace integration_framework {
 
@@ -35,7 +36,7 @@ namespace integration_framework {
     }
 
     void rawInsertBlock(const iroha::model::Block &block) {
-      instance_->storage->insertBlock({block});
+      instance_->storage->insertBlock(shared_model::proto::from_old(block));
     }
 
     void initPipeline(const iroha::keypair_t &key_pair) {

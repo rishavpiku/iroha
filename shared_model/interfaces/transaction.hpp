@@ -60,6 +60,13 @@ namespace shared_model {
        */
       virtual const CommandsType &commands() const = 0;
 
+      virtual const HashType &hash() const override {
+        if (hash_ == boost::none) {
+          hash_.emplace(HashProviderType::makeHash(payload()));
+        }
+        return *hash_;
+      }
+
 #ifndef DISABLE_BACKWARD
       iroha::model::Transaction *makeOldModel() const override {
         iroha::model::Transaction *oldStyleTransaction =

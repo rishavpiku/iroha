@@ -35,6 +35,7 @@
 #include "model/permissions.hpp"
 #include "model/sha3_hash.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_fixture.hpp"
+#include "backend/protobuf/from_old_model.hpp"
 
 using namespace iroha::ametsuchi;
 using namespace iroha::model;
@@ -146,7 +147,7 @@ void validateAccount(W &&wsv,
  * @param block to apply
  */
 template <typename S>
-void apply(S &&storage, const Block &block) {
+void apply(S &&storage, const shared_model::interface::Block &block) {
   std::unique_ptr<MutableStorage> ms;
   auto storageResult = storage->createMutableStorage();
   storageResult.match(
@@ -177,7 +178,7 @@ TEST_F(AmetsuchiTest, GetBlocksCompletedWhenCalled) {
   Block block;
   block.height = 1;
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   auto completed_wrapper =
       make_test_subscriber<IsCompleted>(blocks->getBlocks(1, 1));
@@ -229,7 +230,7 @@ TEST_F(AmetsuchiTest, SampleTest) {
   block.hash = block1hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   validateAccount(wsv, user1id, domain);
 
@@ -260,7 +261,7 @@ TEST_F(AmetsuchiTest, SampleTest) {
   block.hash = block2hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   validateAccountAsset(wsv, user1id, assetid, iroha::Amount(50, 2));
   validateAccountAsset(wsv, user2id, assetid, iroha::Amount(100, 2));
@@ -268,7 +269,7 @@ TEST_F(AmetsuchiTest, SampleTest) {
   // Block store tests
   auto hashes = {block1hash, block2hash};
   validateCalls(blocks->getBlocks(1, 2),
-                [ i = 0, &hashes ](auto eachBlock) mutable {
+                [i = 0, &hashes](auto eachBlock) mutable {
                   EXPECT_EQ(*(hashes.begin() + i), eachBlock.hash);
                   ++i;
                 },
@@ -306,7 +307,7 @@ TEST_F(AmetsuchiTest, PeerTest) {
   Block block;
   block.transactions.push_back(txn);
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   auto peers = wsv->getPeers();
   ASSERT_TRUE(peers);
@@ -372,7 +373,7 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
   block.hash = block1hash;
   block.txs_number = static_cast<uint16_t>(block.transactions.size());
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   // Check querying accounts
   for (const auto &id : {user1id, user2id, user3id}) {
@@ -399,7 +400,7 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
   block.hash = block2hash;
   block.txs_number = static_cast<uint16_t>(block.transactions.size());
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   // Check account asset after transfer assets
   validateAccountAsset(wsv, user1id, asset1id, iroha::Amount(180, 2));
@@ -424,7 +425,7 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
   block.hash = block3hash;
   block.txs_number = static_cast<uint16_t>(block.transactions.size());
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   validateAccountAsset(wsv, user2id, asset2id, iroha::Amount(90, 2));
   validateAccountAsset(wsv, user3id, asset2id, iroha::Amount(150, 2));
@@ -433,7 +434,7 @@ TEST_F(AmetsuchiTest, queryGetAccountAssetTransactionsTest) {
   // Block store test
   auto hashes = {block1hash, block2hash, block3hash};
   validateCalls(blocks->getBlocks(1, 3),
-                [ i = 0, &hashes ](auto eachBlock) mutable {
+                [i = 0, &hashes](auto eachBlock) mutable {
                   EXPECT_EQ(*(hashes.begin() + i), eachBlock.hash);
                   ++i;
                 },
@@ -503,7 +504,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   block.hash = block1hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   {
     auto account = wsv->getAccount(user1id);
@@ -534,7 +535,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   block.hash = block2hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   {
     auto account = wsv->getAccount(user1id);
@@ -565,7 +566,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   block.hash = block3hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   {
     auto account1 = wsv->getAccount(user1id);
@@ -603,7 +604,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   block.hash = block4hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   {
     auto account = wsv->getAccount(user1id);
@@ -644,7 +645,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   block.hash = block5hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   {
     auto account = wsv->getAccount(user2id);
@@ -676,7 +677,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   block.hash = block6hash;
   block.txs_number = block.transactions.size();
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   {
     // user2 only has pubkey1.
@@ -687,7 +688,7 @@ TEST_F(AmetsuchiTest, AddSignatoryTest) {
   }
 }
 
-Block getBlock() {
+std::shared_ptr<shared_model::interface::Block> getBlock() {
   Transaction txn;
   txn.creator_account_id = "admin1";
   AddPeer add_peer;
@@ -700,7 +701,8 @@ Block getBlock() {
   auto block1hash = iroha::hash(block);
   block.txs_number = block.transactions.size();
   block.hash = block1hash;
-  return block;
+  return std::shared_ptr<shared_model::interface::Block>(
+      shared_model::proto::from_old(block).copy());
 }
 
 TEST_F(AmetsuchiTest, TestingStorageWhenInsertBlock) {
@@ -724,7 +726,7 @@ TEST_F(AmetsuchiTest, TestingStorageWhenInsertBlock) {
 
   log->info("Try insert block");
 
-  auto inserted = storage->insertBlock(getBlock());
+  auto inserted = storage->insertBlock(*getBlock());
   ASSERT_TRUE(inserted);
 
   log->info("Request ledger information");
@@ -765,7 +767,7 @@ TEST_F(AmetsuchiTest, TestingStorageWhenDropAll) {
 
   log->info("Try insert block");
 
-  auto inserted = storage->insertBlock(getBlock());
+  auto inserted = storage->insertBlock(*getBlock());
   ASSERT_TRUE(inserted);
 
   log->info("Request ledger information");
@@ -852,7 +854,7 @@ TEST_F(AmetsuchiTest, FindTxByHashTest) {
   block.txs_number = block.transactions.size();
   block.hash = iroha::hash(block);
 
-  apply(storage, block);
+  apply(storage, shared_model::proto::from_old(block));
 
   // TODO: 31.10.2017 luckychess move tx3hash case into a separate test after
   // ametsuchi_test redesign

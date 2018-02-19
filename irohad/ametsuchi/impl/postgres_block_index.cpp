@@ -89,18 +89,22 @@ namespace iroha {
       boost::for_each(
           block.transactions | boost::adaptors::indexed(0),
           [&](const auto &tx) {
+            log_->info("initializing fields");
             const auto &creator_id = tx.value().creator_account_id;
             const auto &hash = iroha::hash(tx.value()).to_string();
             const auto &index = std::to_string(tx.index());
-
+            log_->info("fields initialized");
             // tx hash -> block where hash is stored
             this->execute("INSERT INTO height_by_hash(hash, height) VALUES ("
                           + transaction_.quote(
                                 pqxx::binarystring(hash.data(), hash.size()))
                           + ", " + transaction_.quote(height) + ");");
 
+            log_->info("height_by_hash inserted");
+
             this->indexAccountIdHeight(creator_id, height);
 
+            log_->info("accountIdHeight indexed");
             // to make index account_id:height -> list of tx indexes
             // (where tx is placed in the block)
             execute_(
@@ -111,8 +115,12 @@ namespace iroha {
                 + transaction_.quote(height) + ", " + transaction_.quote(index)
                 + ");");
 
+            log_->info("index_by_creator_height inserted");
+
             this->indexAccountAssets(
                 creator_id, height, index, tx.value().commands);
+
+            log_->info("account assets indexed");
           });
     }
   }  // namespace ametsuchi

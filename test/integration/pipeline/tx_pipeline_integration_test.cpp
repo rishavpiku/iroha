@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include "backend/protobuf/from_old_model.hpp"
 #include "backend/protobuf/transaction.hpp"
 #include "builders/protobuf/queries.hpp"
 #include "builders/protobuf/transaction.hpp"
@@ -41,24 +42,41 @@ class TxPipelineIntegrationTest : public TxPipelineIntegrationTestFixture {
         iroha::model::generators::BlockGenerator().generateGenesisBlock(
             0, {genesis_tx});
 
+//    auto shared_block = *shared_model::proto::from_old(genesis_block).makeOldModel();
+//
+//    ASSERT_EQ(genesis_block.hash, shared_block.hash);
+//    ASSERT_EQ(genesis_block.prev_hash, shared_block.prev_hash);
+//    ASSERT_EQ(genesis_block.txs_number, shared_block.txs_number);
+//    ASSERT_EQ(genesis_block.sigs, shared_block.sigs);
+//    ASSERT_EQ(genesis_block.transactions.size(), shared_block.transactions.size());
+//    ASSERT_EQ(genesis_block.created_ts, shared_block.created_ts);
+//
+//
+//    ASSERT_EQ(genesis_block.transactions[0].tx_counter, shared_block.transactions[0].tx_counter);
+//    ASSERT_EQ(genesis_block.transactions[0].created_ts, shared_block.transactions[0].created_ts);
+//
+//    for (std::size_t i = 0; i < genesis_block.transactions[0].commands.size(); i++) {
+//      ASSERT_EQ(*genesis_block.transactions[0].commands[i], *shared_block.transactions[0].commands[i]);
+//    }
+
+
     manager = std::make_shared<iroha::KeysManagerImpl>("node0");
     auto keypair = manager->loadKeys().value();
 
-    irohad = std::make_shared<TestIrohad>(
-        block_store_path,
-        pgopt_,
-        0,
-        10001,
-        10,
-        5000ms,
-        5000ms,
-        5000ms,
-        keypair);
+    irohad = std::make_shared<TestIrohad>(block_store_path,
+                                          pgopt_,
+                                          0,
+                                          10001,
+                                          10,
+                                          5000ms,
+                                          5000ms,
+                                          5000ms,
+                                          keypair);
 
     ASSERT_TRUE(irohad->storage);
 
     // insert genesis block
-    irohad->storage->insertBlock(genesis_block);
+    irohad->storage->insertBlock(shared_model::proto::from_old(genesis_block));
 
     // initialize irohad
     irohad->init();

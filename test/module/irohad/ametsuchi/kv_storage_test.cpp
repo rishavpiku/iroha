@@ -21,6 +21,7 @@
 #include "ametsuchi/impl/postgres_wsv_query.hpp"
 #include "ametsuchi/impl/storage_impl.hpp"
 #include "ametsuchi/mutable_storage.hpp"
+#include "backend/protobuf/from_old_model.hpp"
 #include "model/account.hpp"
 #include "model/commands/create_account.hpp"
 #include "model/commands/create_domain.hpp"
@@ -98,6 +99,8 @@ class KVTest : public AmetsuchiTest {
     block1.hash = block1hash;
     block1.txs_number = block1.transactions.size();
 
+    // TODO: Add command builders to create shared_model block
+    auto shared_block = shared_model::proto::from_old(block1);
     {
       std::unique_ptr<MutableStorage> ms;
       auto storageResult = storage->createMutableStorage();
@@ -107,9 +110,10 @@ class KVTest : public AmetsuchiTest {
           [](iroha::expected::Error<std::string> &error) {
             FAIL() << "MutableStorage: " << error.error;
           });
-      ms->apply(block1, [](const auto &blk, auto &query, const auto &top_hash) {
-        return true;
-      });
+      ms->apply(shared_block,
+                [](const auto &blk, auto &query, const auto &top_hash) {
+                  return true;
+                });
       storage->commit(std::move(ms));
     }
   }
