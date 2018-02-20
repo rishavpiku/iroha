@@ -20,11 +20,16 @@
 #include "model/converters/json_transaction_factory.hpp"
 #include "model/converters/pb_query_factory.hpp"
 #include "model/converters/pb_transaction_factory.hpp"
+#include "torii/command_client_impl.hpp"
+#include "torii/query_client_impl.hpp"
 
 namespace iroha_cli {
 
   CliClient::CliClient(std::string target_ip, int port)
-      : command_client_(target_ip, port), query_client_(target_ip, port) {}
+      : command_client_(
+            std::make_unique<torii::CommandSyncClient>(target_ip, port)),
+        query_client_(
+            std::make_unique<torii_utils::QuerySyncClient>(target_ip, port)) {}
 
   CliClient::Response<CliClient::TxStatus> CliClient::sendTx(
       iroha::model::Transaction tx) {
@@ -33,7 +38,7 @@ namespace iroha_cli {
     iroha::model::converters::PbTransactionFactory factory;
     auto pb_tx = factory.serialize(tx);
     // Send to iroha:
-    response.status = command_client_.Torii(pb_tx);
+    response.status = command_client_->Torii(pb_tx);
 
     // TODO 12/10/2017 neewy implement return of real transaction status IR-494
     response.answer = TxStatus::OK;
@@ -48,7 +53,7 @@ namespace iroha_cli {
     iroha::protocol::TxStatusRequest statusRequest;
     statusRequest.set_tx_hash(tx_hash);
     iroha::protocol::ToriiResponse toriiResponse;
-    response.status = command_client_.Status(statusRequest, toriiResponse);
+    response.status = command_client_->Status(statusRequest, toriiResponse);
     response.answer = toriiResponse;
 
     return response;
@@ -61,7 +66,7 @@ namespace iroha_cli {
     iroha::model::converters::PbQueryFactory pb_factory;
     auto pb_query = pb_factory.serialize(query);
     iroha::protocol::QueryResponse query_response;
-    response.status = query_client_.Find(pb_query.value(), query_response);
+    response.status = query_client_->Find(pb_query.value(), query_response);
     response.answer = query_response;
     return response;
   }

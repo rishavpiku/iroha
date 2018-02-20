@@ -28,7 +28,7 @@ limitations under the License.
 #include "model/permissions.hpp"
 #include "torii/processor/query_processor_impl.hpp"
 #include "torii/processor/transaction_processor_impl.hpp"
-#include "torii/query_client.hpp"
+#include "torii/query_client_impl.hpp"
 #include "torii/query_service.hpp"
 
 constexpr const char *Ip = "0.0.0.0";

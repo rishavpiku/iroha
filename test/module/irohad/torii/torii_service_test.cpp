@@ -23,12 +23,12 @@ limitations under the License.
 #include <endpoint.pb.h>
 #include "main/server_runner.hpp"
 
-#include "torii/command_client.hpp"
+#include "torii/command_client_impl.hpp"
 #include "torii/processor/query_processor_impl.hpp"
 
 #include "torii/command_service.hpp"
 #include "torii/processor/transaction_processor_impl.hpp"
-#include "torii/query_client.hpp"
+#include "torii/query_client_impl.hpp"
 #include "torii/query_service.hpp"
 
 #include "builders/protobuf/transaction.hpp"

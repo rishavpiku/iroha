@@ -15,35 +15,48 @@
  * limitations under the License.
  */
 
-#ifndef TORII_UTILS_QUERY_CLIENT_HPP
-#define TORII_UTILS_QUERY_CLIENT_HPP
+#ifndef TORII_UTILS_QUERY_CLIENT_IMPL_HPP
+#define TORII_UTILS_QUERY_CLIENT_IMPL_HPP
 
-namespace iroha {
-  namespace protocol {
-    class Query;
-    class QueryResponse;
-  }  // namespace protocol
-}  // namespace iroha
+#include <endpoint.grpc.pb.h>
+#include <grpc++/grpc++.h>
+#include <memory>
+#include "torii/query_client.hpp"
 
 namespace torii_utils {
 
   /**
-   * Interface for access to query service from client.
+   * CommandSyncClient
    */
-  class QueryClient {
+  class QuerySyncClient : public QueryClient {
    public:
+    QuerySyncClient(const std::string &ip, size_t port);
+
+    QuerySyncClient(const QuerySyncClient &);
+    QuerySyncClient &operator=(QuerySyncClient);
+
+    QuerySyncClient(QuerySyncClient &&) noexcept;
+    QuerySyncClient &operator=(QuerySyncClient &&) noexcept;
+
     /**
      * requests query to a torii server and returns response (blocking, sync)
      * @param query - contains Query what clients request.
      * @param response - QueryResponse that contains what clients want to get.
      * @return grpc::Status
      */
-    virtual grpc::Status Find(
-        const iroha::protocol::Query &query,
-        iroha::protocol::QueryResponse &response) const = 0;
+    grpc::Status Find(const iroha::protocol::Query &query,
+                      iroha::protocol::QueryResponse &response) const override;
 
-    virtual ~QueryClient() = default;
+    ~QuerySyncClient() override = default;
+
+   private:
+    void swap(QuerySyncClient &lhs, QuerySyncClient &rhs);
+
+    std::string ip_;
+    size_t port_;
+    std::unique_ptr<iroha::protocol::QueryService::Stub> stub_;
   };
+
 }  // namespace torii_utils
 
-#endif  // TORII_UTILS_QUERY_CLIENT_HPP
+#endif  // TORII_UTILS_QUERY_CLIENT_IMPL_HPP

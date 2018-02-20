@@ -15,38 +15,46 @@
  * limitations under the License.
  */
 
-#ifndef TORII_IROHA_COMMAND_CLIENT_HPP
-#define TORII_IROHA_COMMAND_CLIENT_HPP
+#ifndef TORII_COMMAND_CLIENT_IMPL_HPP
+#define TORII_COMMAND_CLIENT_IMPL_HPP
 
-namespace iroha {
-  namespace protocol {
-    class Transaction;
-    class TxStatusRequest;
-    class ToriiResponse;
-  }
-}
+#include <endpoint.grpc.pb.h>
+#include <grpc++/grpc++.h>
+#include <memory>
+#include <thread>
+#include "torii/command_client.hpp"
 
 namespace torii {
 
   /**
-   * Interface provides access to command server from client.
+   * CommandSyncClient
    */
-  class CommandClient {
+  class CommandSyncClient : public CommandClient {
    public:
+    CommandSyncClient(const std::string &ip, size_t port);
+
+    CommandSyncClient(const CommandSyncClient &);
+    CommandSyncClient &operator=(CommandSyncClient);
+
+    CommandSyncClient(CommandSyncClient &&) noexcept;
+    CommandSyncClient &operator=(CommandSyncClient &&) noexcept;
+
+    ~CommandSyncClient() override = default;
+
     /**
      * requests tx to a torii server and returns response (blocking, sync)
      * @param tx
      * @return grpc::Status - returns connection is success or not.
      */
-    virtual grpc::Status Torii(const iroha::protocol::Transaction &tx) const = 0;
+    grpc::Status Torii(const iroha::protocol::Transaction &tx) const override;
 
     /**
      * @param tx
      * @param response returns ToriiResponse if succeeded
      * @return grpc::Status - returns connection is success or not.
      */
-    virtual grpc::Status Status(const iroha::protocol::TxStatusRequest &tx,
-                        iroha::protocol::ToriiResponse &response) const = 0;
+    grpc::Status Status(const iroha::protocol::TxStatusRequest &tx,
+                        iroha::protocol::ToriiResponse &response) const override;
 
     /**
      * Acquires stream of transaction statuses from the request
@@ -54,12 +62,17 @@ namespace torii {
      * @param tx - transaction to send.
      * @param response - vector of all statuses during tx pipeline.
      */
-    virtual void StatusStream(
+    void StatusStream(
         const iroha::protocol::TxStatusRequest &tx,
-        std::vector<iroha::protocol::ToriiResponse> &response) const = 0;
+        std::vector<iroha::protocol::ToriiResponse> &response) const override;
 
-    virtual ~CommandClient() = default;
+   private:
+    void swap(CommandSyncClient &lhs, CommandSyncClient &rhs);
+    std::string ip_;
+    size_t port_;
+    std::unique_ptr<iroha::protocol::CommandService::Stub> stub_;
   };
-}
 
-#endif //TORII_UTILS_IROHA_COMMAND_CLIENT_HPP
+}  // namespace torii
+
+#endif  // TORII_COMMAND_CLIENT_IMPL_HPP

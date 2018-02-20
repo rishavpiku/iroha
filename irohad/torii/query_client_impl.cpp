@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-#include "torii/query_client.hpp"
+#include "torii/query_client_impl.hpp"
+#include <endpoint.pb.h>
+#include <grpc++/channel.h>
+#include <thread>
 
 namespace torii_utils {
 

@@ -20,7 +20,7 @@
 #include <grpc++/grpc++.h>
 
 #include "block.pb.h"
-#include "torii/command_client.hpp"
+#include "torii/command_client_impl.hpp"
 
 namespace torii {
 

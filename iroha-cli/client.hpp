@@ -18,8 +18,9 @@
 #ifndef IROHA_CLIENT_HPP
 #define IROHA_CLIENT_HPP
 
+#include <grpc++/grpc++.h>
+#include <memory>
 #include <string>
-
 #include "torii/command_client.hpp"
 #include "torii/query_client.hpp"
 
@@ -27,8 +28,8 @@ namespace iroha {
   namespace model {
     struct Query;
     struct Transaction;
-  }
-}
+  }  // namespace model
+}  // namespace iroha
 
 namespace iroha_cli {
 
@@ -64,8 +65,8 @@ namespace iroha_cli {
         std::string tx_hash);
 
    private:
-    torii::CommandSyncClient command_client_;
-    torii_utils::QuerySyncClient query_client_;
+    std::unique_ptr<torii::CommandClient> command_client_;
+    std::unique_ptr<torii_utils::QueryClient> query_client_;
   };
 }  // namespace iroha_cli
 
