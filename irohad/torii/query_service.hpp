@@ -1,18 +1,19 @@
-/*
-Copyright 2017 Soramitsu Co., Ltd.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+/**
+ * Copyright Soramitsu Co., Ltd. 2018 All Rights Reserved.
+ * http://soramitsu.co.jp
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef TORII_QUERY_SERVICE_HPP
 #define TORII_QUERY_SERVICE_HPP
@@ -21,11 +22,10 @@ limitations under the License.
 #include <endpoint.pb.h>
 #include <responses.pb.h>
 #include <unordered_map>
+#include "logger/logger.hpp"
 #include "model/converters/pb_query_factory.hpp"
 #include "model/converters/pb_query_response_factory.hpp"
 #include "torii/processor/query_processor.hpp"
-
-#include "logger/logger.hpp"
 
 namespace torii {
   /**
@@ -53,6 +53,13 @@ namespace torii {
     void Find(iroha::protocol::Query const &request,
               iroha::protocol::QueryResponse &response);
 
+    /** Implementation of grpc interface
+     *
+     * @param context - Server context (see grpc docs for details)
+     * @param request - Query
+     * @param response - QueryResponse
+     * @return grpc status code
+     */
     grpc::Status Find(grpc::ServerContext *context,
                       const iroha::protocol::Query *request,
                       iroha::protocol::QueryResponse *response) override;

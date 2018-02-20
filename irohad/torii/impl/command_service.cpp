@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
+#include "torii/command_service.hpp"
 #include <thread>
-
 #include "ametsuchi/block_query.hpp"
 #include "backend/protobuf/transaction.hpp"
 #include "builders/protobuf/transport_builder.hpp"
@@ -25,7 +25,6 @@
 #include "interfaces/base/hashable.hpp"
 #include "model/converters/pb_common.hpp"
 #include "model/sha3_hash.hpp"
-#include "torii/command_service.hpp"
 #include "validators/default_validator.hpp"
 #include "validators/transaction_validator.hpp"
 

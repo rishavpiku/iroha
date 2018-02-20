@@ -17,10 +17,7 @@
 
 #include "torii/processor/transaction_processor_impl.hpp"
 #include <endpoint.pb.h>
-#include <iostream>
-#include <utility>
 #include "model/sha3_hash.hpp"
-#include "model/transaction_response.hpp"
 
 namespace iroha {
   namespace torii {

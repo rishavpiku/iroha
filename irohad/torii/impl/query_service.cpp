@@ -51,9 +51,7 @@ namespace torii {
         // Query was already processed
         response.mutable_error_response()->set_reason(
             iroha::protocol::ErrorResponse::STATELESS_INVALID);
-      }
-
-      else {
+      } else {
         // Query - response relationship
         handler_map_.emplace(hash, response);
         // Send query to iroha
