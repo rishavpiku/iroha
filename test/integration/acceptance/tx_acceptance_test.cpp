@@ -271,7 +271,7 @@ TEST(AcceptanceTest, Transaction10MinutesFromFuture) {
 TEST(AcceptanceTest, DISABLED_TransactionEmptyPubKey) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
-          .txCounter(std::numeric_limits<uint64_t>::max())
+          .txCounter(2)
           .createdTime(iroha::time::now())
           .creatorAccountId(kAdmin)
           .addAssetQuantity(kAdmin, kAsset, "1.0")
@@ -298,7 +298,7 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptyPubKey) {
 TEST(AcceptanceTest, DISABLED_TransactionEmptySignedblob) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
-          .txCounter(std::numeric_limits<uint64_t>::max())
+          .txCounter(2)
           .createdTime(iroha::time::now())
           .creatorAccountId(kAdmin)
           .addAssetQuantity(kAdmin, kAsset, "1.0")
@@ -323,7 +323,7 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptySignedblob) {
 TEST(AcceptanceTest, DISABLED_TransactionInvalidPublicKey) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
-          .txCounter(std::numeric_limits<uint64_t>::max())
+          .txCounter(2)
           .createdTime(iroha::time::now())
           .creatorAccountId(kAdmin)
           .addAssetQuantity(kAdmin, kAsset, "1.0")
@@ -349,7 +349,7 @@ TEST(AcceptanceTest, DISABLED_TransactionInvalidPublicKey) {
 TEST(AcceptanceTest, DISABLED_TransactionInvalidSignedBlob) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
-          .txCounter(std::numeric_limits<uint64_t>::max())
+          .txCounter(2)
           .createdTime(iroha::time::now())
           .creatorAccountId(kAdmin)
           .addAssetQuantity(kAdmin, kAsset, "1.0")
@@ -368,5 +368,27 @@ TEST(AcceptanceTest, DISABLED_TransactionInvalidSignedBlob) {
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessInvalid)
+      .done();
+}
+/**
+ * @given some user
+ * @when sending transactions with valid signature
+ * @then receive STATELESS_VALIDATION_SUCCESS status
+ *       AND STATEFUL_VALIDATION_SUCCESS on that tx
+ */
+TEST(AcceptanceTest, TransactionValidSignedBlob) {
+  shared_model::proto::Transaction tx =
+      shared_model::proto::TransactionBuilder()
+          .txCounter(2)
+          .createdTime(iroha::time::now())
+          .creatorAccountId(kAdmin)
+          .addAssetQuantity(kAdmin, kAsset, "1.0")
+          .build()
+          .signAndAddSignature(kAdminKeypair);
+  integration_framework::IntegrationTestFramework(1)
+      .setInitialState(kAdminKeypair)
+      .sendTx(tx, checkStatelessValid)
+      .skipProposal()
+      .checkBlock(checkStatefulValid)
       .done();
 }
