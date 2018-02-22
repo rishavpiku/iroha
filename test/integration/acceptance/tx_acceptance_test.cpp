@@ -317,10 +317,10 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptySignedblob) {
 }
 /**
  * @given some user
- * @when sending transactions with Invalid Signature
+ * @when sending transactions with Invalid PublicKey
  * @then receive STATELESS_VALIDATION_FAILED status
  */
-TEST(AcceptanceTest, DISABLED_TransactionInvalidSignature) {
+TEST(AcceptanceTest, DISABLED_TransactionInvalidPublicKey) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
           .txCounter(std::numeric_limits<uint64_t>::max())
