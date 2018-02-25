@@ -21,7 +21,7 @@ find_package(Threads REQUIRED)
 ##########################
 #         gtest          #
 ##########################
-# testing is an option. Look at the main CMakeLists.txt for details.
+# testing is an option. Look at the main clang-tidy.cmake for details.
 if (TESTING)
   find_package(gtest)
 endif ()

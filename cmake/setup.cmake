@@ -38,3 +38,4 @@ endif()
 # 2. if successful, enable according target. if not - does nothing.
 include(cmake/analysis/cppcheck.cmake)
 include(cmake/analysis/clang-format.cmake)
+include(cmake/analysis/clang-tidy.cmake)
