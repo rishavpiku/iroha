@@ -3,20 +3,8 @@ if(NOT CLANG_TIDY_BIN)
 endif()
 
 if(CLANG_TIDY_BIN)
-  set(TIDY_CHECKS
-      -*                    # disable all checks
-      cppcoreguidelines-*   # enable these
-      boost-*
-      google-*
-      modernize-*
-      performance-*
-
-      CACHE STRING "Clang tidy checks"
-      )
-  JOIN("${TIDY_CHECKS}" "," "TIDY_CHECKS_JOINED")
   set(CMAKE_CXX_CLANG_TIDY
-      ${CLANG_TIDY_BIN};
-      -checks=${TIDY_CHECKS_JOINED}
+      ${CLANG_TIDY_BIN}
 
       CACHE STRING ""
       )
