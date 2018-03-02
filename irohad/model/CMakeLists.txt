@@ -17,6 +17,7 @@
 
 add_subdirectory(generators)
 add_subdirectory(converters)
+add_subdirectory(compatibility)
 
 add_library(common_execution
     execution/impl/common_executor.cpp
