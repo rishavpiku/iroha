@@ -126,7 +126,7 @@ namespace shared_model {
        * @return pointer for wrapped object
        */
       WrappedType &operator*() {
-        return *(ptr_.get());
+        return *ptr_;
       }
 
       /**
@@ -134,7 +134,7 @@ namespace shared_model {
        * @return pointer for wrapped object
        */
       const WrappedType &operator*() const {
-        return *(ptr_.get());
+        return *ptr_;
       }
 
      private:
