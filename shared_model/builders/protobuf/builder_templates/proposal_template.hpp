@@ -92,8 +92,8 @@ namespace shared_model {
 
       Proposal build() {
         static_assert(S == (1 << TOTAL) - 1, "Required fields are not set");
-        auto answer = stateless_validator_.validate(
-            detail::makePolymorphic<Proposal>(proposal_));
+        auto answer =
+            stateless_validator_.validate(static_cast<Proposal>(proposal_));
         if (answer.hasErrors()) {
           throw std::invalid_argument(answer.reason());
         }

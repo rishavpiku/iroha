@@ -57,8 +57,7 @@ TEST_F(QueryValidatorTest, StatelessValidTest) {
         }
       },
       [&] {
-        auto answer = query_validator.validate(
-            detail::makePolymorphic<proto::Query>(qry));
+        auto answer = query_validator.validate(static_cast<proto::Query>(qry));
 
         ASSERT_FALSE(answer.hasErrors()) << answer.reason();
       });
@@ -88,8 +87,7 @@ TEST_F(QueryValidatorTest, StatelessInvalidTest) {
         // Note that no fields are set
       },
       [&] {
-        auto answer = query_validator.validate(
-            detail::makePolymorphic<proto::Query>(qry));
+        auto answer = query_validator.validate(static_cast<proto::Query>(qry));
 
         ASSERT_TRUE(answer.hasErrors());
       });

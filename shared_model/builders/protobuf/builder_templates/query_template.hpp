@@ -204,8 +204,7 @@ namespace shared_model {
 
       auto build() const {
         static_assert(S == (1 << TOTAL) - 1, "Required fields are not set");
-        auto answer = stateless_validator_.validate(
-            detail::makePolymorphic<Query>(query_));
+        auto answer = stateless_validator_.validate(static_cast<Query>(query_));
         if (answer.hasErrors()) {
           throw std::invalid_argument(answer.reason());
         }
