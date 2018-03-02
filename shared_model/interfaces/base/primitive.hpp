@@ -53,7 +53,7 @@ namespace shared_model {
        * model
        * @return pointer for old-style object
        */
-      DEPRECATED virtual OldModelType *makeOldModel() const = 0;
+      DEPRECATED virtual OldModelType *makeOldModel() const;
     };
 
   }  // namespace interface

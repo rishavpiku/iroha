@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#ifndef IROHA_OLDMODEL_QUERIES_FWD_HPP_
+#define IROHA_OLDMODEL_QUERIES_FWD_HPP_
 
-#include "backend/protobuf/commands/commands_fwd.hpp"
-#include "backend/protobuf/objects_fwd.hpp"
+/**
+ * @brief This file contains forward declarations for queries.
+ */
 
 namespace iroha {
   namespace model {
-    namespace compatibility {
+    struct GetAccount;
+    struct GetAccountAssets;
+    struct GetAccountDetail;
+    struct GetAssetInfo;
+    struct GetRoles;
+    struct GetSignatories;
+    struct GetTransactions;
+  }
+}
 
-      namespace om = iroha::model;
-      namespace sm = shared_model::interface;
-
-      om::Transaction *makeOldModel(const sm::Transaction &tx);
-
-    }  // namespace compatibility
-  }    // namespace model
-}  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP
+#endif  //  IROHA_OLDMODEL_QUERIES_FWD_HPP_

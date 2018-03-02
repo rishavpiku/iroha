@@ -15,23 +15,33 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#ifndef IROHA_OLDMODEL_COMMANDS_FWD_HPP_
+#define IROHA_OLDMODEL_COMMANDS_FWD_HPP_
 
-#include "backend/protobuf/commands/commands_fwd.hpp"
-#include "backend/protobuf/objects_fwd.hpp"
+/**
+ * @brief This file contains forward declarations for commands.
+ */
 
 namespace iroha {
   namespace model {
-    namespace compatibility {
 
-      namespace om = iroha::model;
-      namespace sm = shared_model::interface;
+    struct AddAssetQuantity;
+    struct AddPeer;
+    struct AddSignatory;
+    struct AppendRole;
+    struct CreateAccount;
+    struct CreateAsset;
+    struct CreateDomain;
+    struct CreateRole;
+    struct DetachRole;
+    struct GrantPermission;
+    struct RemoveSignatory;
+    struct RevokePermission;
+    struct SetAccountDetail;
+    struct SetQuorum;
+    struct SubtractAssetQuantity;
+    struct TransferAsset;
+  }
+}
 
-      om::Transaction *makeOldModel(const sm::Transaction &tx);
-
-    }  // namespace compatibility
-  }    // namespace model
-}  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP
+#endif  //  IROHA_OLDMODEL_COMMANDS_FWD_HPP_

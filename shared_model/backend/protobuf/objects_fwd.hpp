@@ -15,23 +15,19 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#ifndef IROHA_OBJECTS_FWD_HPP_
+#define IROHA_OBJECTS_FWD_HPP_
 
 #include "backend/protobuf/commands/commands_fwd.hpp"
-#include "backend/protobuf/objects_fwd.hpp"
+#include "backend/protobuf/queries/queries_fwd.hpp"
+#include "backend/protobuf/query_responses/query_responses_fwd.hpp"
 
-namespace iroha {
-  namespace model {
-    namespace compatibility {
+namespace shared_model {
+  namespace proto {
+    class Transaction;
+    class Block;
+    class Proposal;
+  }  // namespace interface
+}  // namespace shared_model
 
-      namespace om = iroha::model;
-      namespace sm = shared_model::interface;
-
-      om::Transaction *makeOldModel(const sm::Transaction &tx);
-
-    }  // namespace compatibility
-  }    // namespace model
-}  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP
+#endif  //  IROHA_OBJECTS_FWD_HPP_

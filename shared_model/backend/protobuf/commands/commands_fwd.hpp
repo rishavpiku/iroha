@@ -15,23 +15,29 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#ifndef IROHA_COMMANDS_FWD_HPP_
+#define IROHA_COMMANDS_FWD_HPP_
 
-#include "backend/protobuf/commands/commands_fwd.hpp"
-#include "backend/protobuf/objects_fwd.hpp"
+namespace shared_model {
+  namespace proto {
+    class AddAssetQuantity;
+    class AddPeer;
+    class AddSignatory;
+    class AppendRole;
+    class Command;
+    class CreateAccount;
+    class CreateAsset;
+    class CreateDomain;
+    class CreateRole;
+    class DetachRole;
+    class GrantPermission;
+    class RemoveSignatory;
+    class RevokePermission;
+    class SetAccountDetail;
+    class SetQuorum;
+    class SubtractAssetQuantity;
+    class TransferAsset;
+  }  // namespace proto
+}  // namespace shared_model
 
-namespace iroha {
-  namespace model {
-    namespace compatibility {
-
-      namespace om = iroha::model;
-      namespace sm = shared_model::interface;
-
-      om::Transaction *makeOldModel(const sm::Transaction &tx);
-
-    }  // namespace compatibility
-  }    // namespace model
-}  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP
+#endif  //  IROHA_COMMANDS_FWD_HPP_

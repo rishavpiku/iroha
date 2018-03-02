@@ -20,8 +20,12 @@
 
 #include <boost/variant/static_visitor.hpp>
 #include <type_traits>
+#include "
 
 namespace shared_model {
+
+
+
   namespace detail {
 
     /**
@@ -36,6 +40,7 @@ namespace shared_model {
     };
 
 #ifndef DISABLE_BACKWARD
+
     /**
      * Class provides generic converter for old-fashion domain objects
      * @tparam T abstract return type
