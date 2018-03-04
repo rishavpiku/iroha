@@ -47,7 +47,7 @@ namespace shared_model {
         if (answer.hasErrors()) {
           return iroha::expected::makeError(answer.reason());
         }
-        return iroha::expected::makeValue(std::move(result));
+        return iroha::expected::makeValue(T(std::move(transport)));
       }
 
      private:
