@@ -39,8 +39,6 @@
 #include "backend/protobuf/query_responses/proto_query_response.hpp"
 #include "backend/protobuf/transaction.hpp"
 #include "backend/protobuf/transaction_responses/proto_tx_response.hpp"
-#include "backend/protobuf/block.hpp"
-#include "backend/protobuf/proposal.hpp"
 
 namespace integration_framework {
 
@@ -103,10 +101,10 @@ namespace integration_framework {
                         const std::string &error_reason);
 
    protected:
-    std::shared_ptr<IrohaInstance> iroha_instance_ =
-        std::make_shared<IrohaInstance>();
     tbb::concurrent_queue<ProposalType> proposal_queue_;
     tbb::concurrent_queue<BlockType> block_queue_;
+    std::shared_ptr<IrohaInstance> iroha_instance_ =
+        std::make_shared<IrohaInstance>();
 
     // config area
 

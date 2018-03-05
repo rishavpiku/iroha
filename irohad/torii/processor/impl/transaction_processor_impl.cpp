@@ -48,7 +48,8 @@ namespace iroha {
             std::unique_ptr<model::Proposal>(model_proposal->makeOldModel());
         for (const auto &tx : proposal->transactions) {
           proposal_set_.insert(hash(tx).to_string());
-          notify(hash(tx).to_string(), Status::STATELESS_VALIDATION_SUCCESS);
+          this->notify(hash(tx).to_string(),
+                       Status::STATELESS_VALIDATION_SUCCESS);
         }
       });
 

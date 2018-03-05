@@ -60,6 +60,7 @@ class MstPipelineTest : public TxPipelineIntegrationTestFixture {
     ASSERT_TRUE(irohad->storage);
 
     irohad->storage->insertBlock(genesis_block);
+    irohad->resetOrderingService();
     irohad->init();
     irohad->run();
   }
@@ -94,7 +95,7 @@ class MstPipelineTest : public TxPipelineIntegrationTestFixture {
         "admin@test",
         1,
         {gen.generateCreateAccount(account, "test", keypair.pubkey),
-         gen.generateSetQuorum(account, quorum)});
+         gen.generateSetQuorum(account + domain, quorum)});
     for (auto s : signers) {
       auto key = createNewAccountKeypair(s);
       tx.commands.push_back(gen.generateAddSignatory(s, key.pubkey));
