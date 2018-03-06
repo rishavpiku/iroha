@@ -15,23 +15,19 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#ifndef IROHA_INTERFACE_COMMON_OBJECTS_FWD_HPP_
+#define IROHA_INTERFACE_COMMON_OBJECTS_FWD_HPP_
 
-#include "interfaces/objects_fwd.hpp"
-#include "model/objects_fwd.hpp"
+namespace shared_model {
+  namespace interface {
 
-namespace iroha {
-  namespace model {
-    namespace compatibility {
+    class Account;
+    class AccountAsset;
+    class Amount;
+    class Asset;
+    class Peer;
+    class Signature;
+  }
+}
 
-      namespace om = iroha::model;
-      namespace sm = shared_model::interface;
-
-      om::Transaction *makeOldModel(const sm::Transaction &tx);
-
-    }  // namespace compatibility
-  }    // namespace model
-}  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP
+#endif  //  IROHA_INTERFACE_COMMON_OBJECTS_FWD_HPP_

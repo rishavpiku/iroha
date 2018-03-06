@@ -20,7 +20,6 @@
 
 #include <boost/variant/static_visitor.hpp>
 #include <type_traits>
-#include "
 
 namespace shared_model {
 

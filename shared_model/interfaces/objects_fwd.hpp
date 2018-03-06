@@ -15,23 +15,20 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#ifndef IROHA_INTERFACES_OBJECTS_FWD_HPP_
+#define IROHA_INTERFACES_OBJECTS_FWD_HPP_
 
-#include "interfaces/objects_fwd.hpp"
-#include "model/objects_fwd.hpp"
+#include "interfaces/commands/commands_fwd.hpp"
+#include "interfaces/queries/queries_fwd.hpp"
+#include "interfaces/query_responses/query_responses_fwd.hpp"
 
-namespace iroha {
-  namespace model {
-    namespace compatibility {
+namespace shared_model {
+  namespace interface {
 
-      namespace om = iroha::model;
-      namespace sm = shared_model::interface;
+    class Transaction;
+    class Block;
+    class Proposal;
+  }  // namespace interface
+}  // namespace shared_model
 
-      om::Transaction *makeOldModel(const sm::Transaction &tx);
-
-    }  // namespace compatibility
-  }    // namespace model
-}  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP
+#endif  //  IROHA_INTERFACES_OBJECTS_FWD_HPP_
