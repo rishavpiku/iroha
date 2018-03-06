@@ -15,3 +15,27 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+#include "validation/transaction_validator.hpp"
+#include "builders/protobuf/builder_templates/transaction_template.hpp"
+#include "module/shared_model/validators/validators.hpp"
+
+/**
+ * Builder alias, to build shared model proto transaction object avoiding
+ * validation and "required fields" check
+ */
+using TestTransactionBuilder = shared_model::proto::TemplateTransactionBuilder<
+    (1 << shared_model::proto::TemplateTransactionBuilder<>::total) - 1,
+    shared_model::validation::TransactionAlwaysValidValidator,
+    shared_model::proto::Transaction>;
+
+TEST(ComposableTransactionValidatorTest, EmptyFunctionInstantiation) {
+
+  auto transaction = TestTransactionBuilder().creatorAccountId("hello").build();
+  auto validator = shared_model::validation::makeTransactionValidator(
+      [](const auto &creator) { return true; },
+      [](const auto &tx_counter) { return true; },
+      [](const auto &command) { return true; });
+
+  ASSERT_TRUE(validator(transaction));
+}

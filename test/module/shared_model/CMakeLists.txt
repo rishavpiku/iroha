@@ -20,6 +20,7 @@ add_subdirectory(bindings)
 add_subdirectory(converters)
 add_subdirectory(builders)
 add_subdirectory(validators)
+add_subdirectory(validation)
 
 AddTest(lazy_test
     lazy_test.cpp
