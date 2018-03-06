@@ -96,7 +96,7 @@ class OrderingServiceTest : public ::testing::Test {
         std::make_shared<MockOrderingServicePersistentState>();
   }
 
-  auto get_tx() {get_t
+  auto get_tx() {
     return std::make_shared<shared_model::proto::Transaction>(
         shared_model::proto::TransactionBuilder()
         .txCounter(2)
@@ -174,7 +174,7 @@ TEST_F(OrderingServiceTest, ValidWhenProposalSizeStrategy) {
       .WillRepeatedly(Return(std::vector<decltype(peer)>{peer}));
 
   for (size_t i = 0; i < 10; ++i) {
-    ordering_service->onTransaction(x());
+    ordering_service->onTransaction(get_tx());
   }
 
   std::unique_lock<std::mutex> lock(m);
