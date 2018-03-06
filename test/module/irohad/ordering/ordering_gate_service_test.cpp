@@ -25,6 +25,7 @@
 #include "ordering/impl/ordering_gate_transport_grpc.hpp"
 #include "ordering/impl/ordering_service_impl.hpp"
 #include "ordering/impl/ordering_service_transport_grpc.hpp"
+#include "builders/protobuf/transaction.hpp"
 
 using namespace iroha::ordering;
 using namespace iroha::model;
@@ -97,8 +98,15 @@ class OrderingGateServiceTest : public ::testing::Test {
   }
 
   void send_transaction(size_t i) {
-    auto tx = std::make_shared<Transaction>();
-    tx->tx_counter = i;
+    auto tx = std::shared_ptr<Transaction>(shared_model::proto::TransactionBuilder()
+        .txCounter(i)
+        .createdTime(iroha::time::now())
+        .creatorAccountId("admin@ru")
+        .addAssetQuantity("admin@tu", "coin#coin", "1.0")
+        .build()
+        .signAndAddSignature(
+            shared_model::crypto::DefaultCryptoAlgorithmType::
+            generateKeypair()).makeOldModel());
     gate->propagateTransaction(tx);
     // otherwise tx may come unordered
     std::this_thread::sleep_for(20ms);
@@ -167,12 +175,12 @@ TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
   auto wrapper = init(2);
 
   for (size_t i = 0; i < 8; ++i) {
-    send_transaction(i);
+    send_transaction(i + 1);
   }
 
   cv.wait_for(lk, 10s);
-  send_transaction(8);
   send_transaction(9);
+  send_transaction(10);
   cv.wait_for(lk, 10s);
 
   std::this_thread::sleep_for(1s);
@@ -182,7 +190,7 @@ TEST_F(OrderingGateServiceTest, SplittingBunchTransactions) {
   ASSERT_EQ(counter, 0);
   ASSERT_TRUE(wrapper.validate());
 
-  size_t i = 0;
+  size_t i = 1;
   for (auto &&proposal : proposals) {
     for (auto &&tx : proposal.transactions) {
       ASSERT_EQ(tx.tx_counter, i++);
@@ -236,7 +244,7 @@ TEST_F(OrderingGateServiceTest, ProposalsReceivedWhenProposalSize) {
   auto wrapper = init(2);
 
   for (size_t i = 0; i < 10; ++i) {
-    send_transaction(i);
+    send_transaction(i + 1);
   }
 
   // long == something wrong
@@ -246,7 +254,7 @@ TEST_F(OrderingGateServiceTest, ProposalsReceivedWhenProposalSize) {
   ASSERT_EQ(proposals.size(), 2);
   ASSERT_EQ(counter, 0);
 
-  size_t i = 0;
+  size_t i = 1;
   for (auto &&proposal : proposals) {
     ASSERT_EQ(proposal.transactions.size(), 5);
     for (auto &&tx : proposal.transactions) {

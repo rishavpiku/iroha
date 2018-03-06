@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
+#include "simulator/impl/simulator.hpp"
 #include "backend/protobuf/from_old_model.hpp"
 #include "backend/protobuf/transaction.hpp"
+#include "builders/protobuf/proposal.hpp"
+#include "builders/protobuf/transaction.hpp"
+#include "framework/test_subscriber.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/model/model_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "module/irohad/validation/validation_mocks.hpp"
 #include "module/shared_model/builders/protobuf/test_block_builder.hpp"
-
-#include "framework/test_subscriber.hpp"
-#include "simulator/impl/simulator.hpp"
 
 using namespace iroha;
 using namespace iroha::validation;
@@ -84,10 +85,25 @@ TEST_F(SimulatorTest, ValidWhenInitialized) {
 
 TEST_F(SimulatorTest, ValidWhenPreviousBlock) {
   // proposal with height 2 => height 1 block present => new block generated
-  auto txs = std::vector<model::Transaction>(2);
-  auto proposal = model::Proposal(txs);
-  proposal.height = 2;
-
+  auto tx = shared_model::proto::TransactionBuilder()
+                .txCounter(2)
+                .createdTime(iroha::time::now())
+                .creatorAccountId("admin@ru")
+                .addAssetQuantity("admin@tu", "coin#coin", "1.0")
+                .build()
+                .signAndAddSignature(
+                    shared_model::crypto::DefaultCryptoAlgorithmType::
+                        generateKeypair());
+  std::vector<shared_model::proto::Transaction> txs = {tx, tx};
+  auto proposal_p =
+      std::unique_ptr<model::Proposal>(shared_model::proto::ProposalBuilder()
+                                           .height(2)
+                                           .createdTime(iroha::time::now())
+                                           .transactions(txs)
+                                           .build()
+                                           .makeOldModel());
+  auto proposal = *proposal_p;
+  proposal.created_time = iroha::time::now();
   shared_model::proto::Block block = makeBlock(proposal.height - 1);
 
   EXPECT_CALL(*factory, createTemporaryWsv()).Times(1);

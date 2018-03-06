@@ -36,6 +36,24 @@ namespace shared_model {
         return Answer();
       }
     };
+    /**
+   * Block validator which always returns answer with no errors.
+   */
+    class BlockAlwaysValidValidator {
+     public:
+      Answer validate(const interface::Block &) const {
+        return Answer();
+      }
+    };
+  /**
+* Proposal validator which always returns answer with no errors.
+*/
+  class ProposalAlwaysValidValidator {
+   public:
+    Answer validate(const interface::Proposal &) const {
+      return Answer();
+    }
+  };
 
     /**
      * Query validator which always returns answer with no errors.

@@ -32,9 +32,11 @@ namespace shared_model {
                              CommandValidatorVisitor<FieldValidator>>;
     using DefaultQueryValidator =
         QueryValidator<FieldValidator, QueryValidatorVisitor<FieldValidator>>;
-    using DefaultProposalValidator = ProposalValidator;
+    using DefaultProposalValidator =
+        ProposalValidator<FieldValidator, DefaultTransactionValidator>;
 
-    using DefaultBlockValidator = BlockValidator;
+    using DefaultBlockValidator =
+        BlockValidator<FieldValidator, DefaultTransactionValidator>;
 
     using DefaultSignableTransactionValidator =
         SignableModelValidator<DefaultTransactionValidator,

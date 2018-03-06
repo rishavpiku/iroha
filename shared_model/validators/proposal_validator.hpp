@@ -18,6 +18,7 @@
 #ifndef IROHA_PROPOSAL_VALIDATOR_HPP
 #define IROHA_PROPOSAL_VALIDATOR_HPP
 
+#include <boost/format.hpp>
 #include <regex>
 #include "datetime/time.hpp"
 #include "interfaces/common_objects/types.hpp"
@@ -32,17 +33,37 @@ namespace shared_model {
     /**
      * Class that validates proposal
      */
+    template <typename FieldValidator, typename TransactionValidator>
     class ProposalValidator {
+     public:
+      ProposalValidator(
+          const TransactionValidator &transaction_validator =
+              TransactionValidator(),
+          const FieldValidator &field_validator = FieldValidator())
+          : transaction_validator_(transaction_validator),
+            field_validator_(field_validator) {}
+
      private:
       void validateTransaction(
           ReasonsGroupType &reason,
           const interface::Transaction &transaction) const {
-        // TODO 22/01/2018 x3medima17: add stateless validator IR-837
+        auto answer = transaction_validator_.validate(transaction);
+        if (answer.hasErrors()) {
+          auto message = (boost::format("%d %s")
+                          % transaction.transactionCounter() % answer.reason())
+                             .str();
+          reason.second.push_back(message);
+        }
       }
 
       void validateHeight(ReasonsGroupType &reason,
                           const interface::types::HeightType &height) const {
-        // TODO 22/01/2018 x3medima17: add stateless validator IR-837
+        if (height <= 0) {
+          auto message =
+              (boost::format("Height should be > 0, passed value: %d") % height)
+                  .str();
+          reason.second.push_back(message);
+        }
       }
 
      public:
@@ -53,10 +74,9 @@ namespace shared_model {
        */
       Answer validate(const interface::Proposal &prop) const {
         Answer answer;
-        // TODO 22/01/2018 x3medima17: add stateless validator IR-837
         ReasonsGroupType reason;
         reason.first = "Proposal";
-
+        field_validator_.validateCreatedTime(reason, prop.created_time());
         validateHeight(reason, prop.height());
         for (const auto &tx : prop.transactions()) {
           validateTransaction(reason, *tx);
@@ -68,7 +88,8 @@ namespace shared_model {
         return answer;
       }
 
-      Answer answer_;
+      TransactionValidator transaction_validator_;
+      FieldValidator field_validator_;
     };
 
   }  // namespace validation
