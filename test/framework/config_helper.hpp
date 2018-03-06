@@ -1,5 +1,5 @@
 /**
- * Copyright Soramitsu Co., Ltd. 2017 All Rights Reserved.
+ * Copyright Soramitsu Co., Ltd. 2018 All Rights Reserved.
  * http://soramitsu.co.jp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +15,16 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_PROTO_QUERY_BUILDER_HPP
-#define IROHA_PROTO_QUERY_BUILDER_HPP
+#ifndef IROHA_CONFIG_HELPER_HPP
+#define IROHA_CONFIG_HELPER_HPP
 
-#include "builders/protobuf/builder_templates/query_template.hpp"
+#include <string>
 
-namespace shared_model {
-  namespace proto {
+namespace integration_framework {
+  std::string getPostgresCredsOrDefault(const std::string &default_conn =
+                                            "host=localhost port=5432 "
+                                            "user=postgres "
+                                            "password=mysecretpassword");
+}  // namespace integration_framework
 
-    using QueryBuilder = TemplateQueryBuilder<>;
-
-  }  // namespace proto
-}  // namespace shared_model
-
-#endif  // IROHA_PROTO_QUERY_BUILDER_HPP
+#endif  // IROHA_CONFIG_HELPER_HPP

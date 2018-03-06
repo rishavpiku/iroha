@@ -1,5 +1,5 @@
 /**
- * Copyright Soramitsu Co., Ltd. 2017 All Rights Reserved.
+ * Copyright Soramitsu Co., Ltd. 2018 All Rights Reserved.
  * http://soramitsu.co.jp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef IROHA_WSVRESTORER_HPP
+#define IROHA_WSVRESTORER_HPP
 
-#include <numeric>
-
-#include "ametsuchi/impl/peer_query_wsv.hpp"
-#include "ametsuchi/wsv_query.hpp"
-#include "builders/protobuf/common_objects/proto_peer_builder.hpp"
+#include "common/result.hpp"
 
 namespace iroha {
   namespace ametsuchi {
 
-    PeerQueryWsv::PeerQueryWsv(std::shared_ptr<WsvQuery> wsv)
-        : wsv_(std::move(wsv)) {}
+    class Storage;
 
-    boost::optional<std::vector<PeerQuery::wPeer>> PeerQueryWsv::getLedgerPeers() {
-      auto peers = wsv_->getPeers();
-      if (peers) {
-        return boost::make_optional(peers.value());
-      } else {
-        return boost::none;
-      }
-    }
+    /**
+     * Interface for World State View restoring from the storage
+     */
+    class WsvRestorer {
+     public:
+      virtual ~WsvRestorer() = default;
+
+      /**
+       * Recover WSV (World State View).
+       * @param storage storage of blocks in ledger
+       * @return void on success, otherwise error string
+       */
+      virtual expected::Result<void, std::string> restoreWsv(
+          Storage &storage) = 0;
+    };
 
   }  // namespace ametsuchi
 }  // namespace iroha
+
+#endif  // IROHA_WSVRESTORER_HPP
