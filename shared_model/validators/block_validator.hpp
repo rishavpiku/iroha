@@ -51,7 +51,7 @@ namespace shared_model {
           const interface::Transaction &transaction) const {
         auto answer = transaction_validator_.validate(transaction);
         if (answer.hasErrors()) {
-          auto message = (boost::format("%d %s")
+          auto message = (boost::format("Tx #%d: %s")
                           % transaction.transactionCounter() % answer.reason())
                              .str();
           reason.second.push_back(message);
