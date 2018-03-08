@@ -19,6 +19,7 @@
 #define IROHA_BLOCK_VALIDATOR_HPP
 
 #include <boost/format.hpp>
+#include "container_validator.hpp"
 #include "datetime/time.hpp"
 #include "interfaces/common_objects/types.hpp"
 #include "interfaces/iroha_internal/block.hpp"
@@ -34,37 +35,9 @@ namespace shared_model {
      * Class that validates block
      */
     template <typename FieldValidator, typename TransactionValidator>
-    class BlockValidator {
-     private:
-      void validateHeight(ReasonsGroupType &reason,
-                          const interface::types::HeightType &height) const {
-        if (height <= 0) {
-          auto message =
-              (boost::format("Height should be > 0, passed value: %d")
-               % height)
-                  .str();
-          reason.second.push_back(message);
-        }
-      }
-      void validateTransaction(
-          ReasonsGroupType &reason,
-          const interface::Transaction &transaction) const {
-        auto answer = transaction_validator_.validate(transaction);
-        if (answer.hasErrors()) {
-          auto message = (boost::format("Tx #%d: %s")
-                          % transaction.transactionCounter() % answer.reason())
-                             .str();
-          reason.second.push_back(message);
-        }
-      }
-
+    class BlockValidator
+        : public ContainerValidator<FieldValidator, TransactionValidator> {
      public:
-      BlockValidator(const TransactionValidator &transaction_validator =
-                         TransactionValidator(),
-                     const FieldValidator &field_validator = FieldValidator())
-          : transaction_validator_(transaction_validator),
-            field_validator_(field_validator) {}
-
       /**
        * Applies validation on block
        * @param block
@@ -74,19 +47,14 @@ namespace shared_model {
         Answer answer;
         ReasonsGroupType reason;
         reason.first = "Block";
-        field_validator_.validateCreatedTime(reason, block.createdTime());
-        validateHeight(reason, block.height());
-        for (const auto &tx : block.transactions()) {
-          validateTransaction(reason, *tx);
-        }
+        this->field_validator_.validateCreatedTime(reason, block.createdTime());
+        this->validateHeight(reason, block.height());
+        this->validateTransactions(reason, block.transactions());
         if (not reason.second.empty()) {
           answer.addReason(std::move(reason));
         }
-
         return answer;
       }
-      TransactionValidator transaction_validator_;
-      FieldValidator field_validator_;
     };
 
   }  // namespace validation

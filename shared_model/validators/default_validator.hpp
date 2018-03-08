@@ -48,6 +48,15 @@ namespace shared_model {
                                const interface::Query &,
                                FieldValidator>;
 
+    using DefaultSignableProposalValidator =
+        SignableModelValidator<DefaultProposalValidator,
+                               const interface::Proposal &,
+                               FieldValidator>;
+
+    using DefaultSignableBlockValidator =
+        SignableModelValidator<DefaultBlockValidator,
+                               const interface::Block &,
+                               FieldValidator>;
   }  // namespace validation
 }  // namespace shared_model
 

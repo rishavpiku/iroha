@@ -34,38 +34,8 @@ namespace shared_model {
      * Class that validates proposal
      */
     template <typename FieldValidator, typename TransactionValidator>
-    class ProposalValidator {
-     public:
-      ProposalValidator(
-          const TransactionValidator &transaction_validator =
-              TransactionValidator(),
-          const FieldValidator &field_validator = FieldValidator())
-          : transaction_validator_(transaction_validator),
-            field_validator_(field_validator) {}
-
-     private:
-      void validateTransaction(
-          ReasonsGroupType &reason,
-          const interface::Transaction &transaction) const {
-        auto answer = transaction_validator_.validate(transaction);
-        if (answer.hasErrors()) {
-          auto message = (boost::format("Tx #%d: %s")
-                          % transaction.transactionCounter() % answer.reason())
-                             .str();
-          reason.second.push_back(message);
-        }
-      }
-
-      void validateHeight(ReasonsGroupType &reason,
-                          const interface::types::HeightType &height) const {
-        if (height <= 0) {
-          auto message =
-              (boost::format("Height should be > 0, passed value: %d") % height)
-                  .str();
-          reason.second.push_back(message);
-        }
-      }
-
+    class ProposalValidator
+        : public ContainerValidator<FieldValidator, TransactionValidator> {
      public:
       /**
        * Applies validation on proposal
@@ -76,20 +46,14 @@ namespace shared_model {
         Answer answer;
         ReasonsGroupType reason;
         reason.first = "Proposal";
-        field_validator_.validateCreatedTime(reason, prop.created_time());
-        validateHeight(reason, prop.height());
-        for (const auto &tx : prop.transactions()) {
-          validateTransaction(reason, *tx);
-        }
+        this->field_validator_.validateCreatedTime(reason, prop.created_time());
+        this->validateHeight(reason, prop.height());
+        this->validateTransactions(reason, prop.transactions());
         if (not reason.second.empty()) {
           answer.addReason(std::move(reason));
         }
-
         return answer;
       }
-
-      TransactionValidator transaction_validator_;
-      FieldValidator field_validator_;
     };
 
   }  // namespace validation
