@@ -25,9 +25,7 @@
 #include "utils/string_builder.hpp"
 
 #ifndef DISABLE_BACKWARD
-#include "model/block.hpp"
-#include "model/signature.hpp"
-#include "model/transaction.hpp"
+#include "model/compatibility/make_old_model.hpp"
 #endif
 
 namespace shared_model {
@@ -66,28 +64,8 @@ namespace shared_model {
 
 #ifndef DISABLE_BACKWARD
       iroha::model::Block *makeOldModel() const override {
-        iroha::model::Block *old_block = new iroha::model::Block();
-        old_block->height = height();
-        constexpr auto hash_size = iroha::model::Block::HashType::size();
-        old_block->prev_hash =
-            *iroha::hexstringToArray<hash_size>(prevHash().hex());
-        old_block->txs_number = txsNumber();
-        std::for_each(transactions().begin(),
-                      transactions().end(),
-                      [&old_block](auto &tx) {
-                        std::unique_ptr<iroha::model::Transaction> old_tx(
-                            tx->makeOldModel());
-                        old_block->transactions.emplace_back(*old_tx);
-                      });
-        old_block->created_ts = createdTime();
-        old_block->hash = *iroha::hexstringToArray<hash_size>(hash().hex());
-        std::for_each(
-            signatures().begin(), signatures().end(), [&old_block](auto &sig) {
-              std::unique_ptr<iroha::model::Signature> old_sig(
-                  sig->makeOldModel());
-              old_block->sigs.emplace_back(*old_sig);
-            });
-        return old_block;
+        using iroha::model::compatibility::makeOldModel;
+        return makeOldModel(*this);
       }
 #endif
 

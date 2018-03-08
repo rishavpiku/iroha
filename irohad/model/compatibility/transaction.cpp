@@ -22,33 +22,32 @@
 
 namespace iroha {
   namespace model {
+    namespace compatibility {
 
-    namespace om = iroha::model;
-    namespace sm = shared_model::interface;
+      om::Transaction *makeOldModel(const sm::interface::Transaction &tx) {
+        auto *oldStyleTransaction = new om::Transaction();
+        oldStyleTransaction->created_ts = tx.createdTime();
+        oldStyleTransaction->creator_account_id = tx.creatorAccountId();
+        oldStyleTransaction->tx_counter = tx.transactionCounter();
 
-    om::Transaction *makeOldModel(const sm::Transaction &tx) {
-      auto *oldStyleTransaction = new om::Transaction();
-      oldStyleTransaction->created_ts = tx.createdTime();
-      oldStyleTransaction->creator_account_id = tx.creatorAccountId();
-      oldStyleTransaction->tx_counter = tx.transactionCounter();
+        std::for_each(
+            tx.commands().begin(),
+            tx.commands().end(),
+            [oldStyleTransaction](auto &command) {
+              oldStyleTransaction->commands.emplace_back(
+                  std::shared_ptr<om::Command>(command->makeOldModel()));
+            });
 
-      std::for_each(
-          tx.commands().begin(),
-          tx.commands().end(),
-          [oldStyleTransaction](auto &command) {
-            oldStyleTransaction->commands.emplace_back(
-                std::shared_ptr<om::Command>(command->makeOldModel()));
-          });
+        std::for_each(tx.signatures().begin(),
+                      tx.signatures().end(),
+                      [oldStyleTransaction](auto &sig) {
+                        oldStyleTransaction->signatures.emplace_back(
+                            *sig->makeOldModel());
+                      });
 
-      std::for_each(
-          tx.signatures().begin(),
-          tx.signatures().end(),
-          [oldStyleTransaction](auto &sig) {
-            oldStyleTransaction->signatures.emplace_back(*sig->makeOldModel());
-          });
+        return oldStyleTransaction;
+      }
 
-      return oldStyleTransaction;
-    }
-
-  }  // namespace model
+    }  // namespace compatibility
+  }    // namespace model
 }  // namespace iroha

@@ -19,6 +19,7 @@
 #define IROHA_SHARED_MODEL_TRANSACTION_HPP
 
 #include <vector>
+
 #include "interfaces/base/primitive.hpp"
 #include "interfaces/base/signable.hpp"
 #include "interfaces/commands/command.hpp"
@@ -27,7 +28,7 @@
 #include "utils/string_builder.hpp"
 
 #ifndef DISABLE_BACKWARD
-#include "model/transaction.hpp"
+#include "model/compatibility/make_old_model.hpp"
 #endif
 
 namespace shared_model {
@@ -59,6 +60,13 @@ namespace shared_model {
        * @return attached commands
        */
       virtual const CommandsType &commands() const = 0;
+
+#ifndef DISABLE_BACKWARD
+      iroha::model::Transaction *makeOldModel() const override {
+        using iroha::model::compatibility::makeOldModel;
+        return makeOldModel(*this);
+      }
+#endif
 
       std::string toString() const override {
         return detail::PrettyStringBuilder()

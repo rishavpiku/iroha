@@ -34,7 +34,10 @@ namespace shared_model {
 
       explicit PrivateKey(const Blob &blob) : Blob(blob.blob()) {}
 
+#ifndef DISABLE_BACKWARD
       using OldPrivateKeyType = iroha::privkey_t;
+#endif
+
       std::string toString() const override {
         return detail::PrettyStringBuilder()
             .init("PrivateKey")

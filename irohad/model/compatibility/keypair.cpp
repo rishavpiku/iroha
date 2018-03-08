@@ -15,31 +15,22 @@
  * limitations under the License.
  */
 
-#ifndef IROHA_MAKE_OLD_MODEL_HPP
-#define IROHA_MAKE_OLD_MODEL_HPP
+#include "model/compatibility/make_old_model.hpp"
 
-#include "cryptography/objects_fwd.hpp"
-#include "interfaces/objects_fwd.hpp"
-#include "model/objects_fwd.hpp"
+#include "common/types.hpp"
+#include "cryptography/keypair.hpp"
 
 namespace iroha {
-
-  class keypair_t;
-
   namespace model {
     namespace compatibility {
 
-      namespace om = iroha::model;
-      namespace sm = shared_model;
-
-      iroha::keypair_t* makeOldModel(const sm::crypto::Keypair &kp);
-
-      om::Transaction *makeOldModel(const sm::interface::Transaction &tx);
-
-      om::Block *makeOldModel(const sm::interface::Block &b);
-
+      iroha::keypair_t *makeOldModel(const sm::crypto::Keypair &b) {
+        return new iroha::keypair_t{
+            b.publicKey()
+                .makeOldModel<sm::crypto::PublicKey::OldPublicKeyType>(),
+            b.privateKey()
+                .makeOldModel<sm::crypto::PrivateKey::OldPrivateKeyType>()};
+      }
     }  // namespace compatibility
   }    // namespace model
 }  // namespace iroha
-
-#endif  // IROHA_MAKE_OLD_MODEL_HPP

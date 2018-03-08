@@ -34,7 +34,10 @@ namespace shared_model {
 
       explicit PublicKey(const Blob &blob) : Blob(blob.blob()) {}
 
+#ifndef DISABLE_BACKWARD
       using OldPublicKeyType = iroha::pubkey_t;
+#endif
+
       std::string toString() const override {
         return detail::PrettyStringBuilder()
             .init("PublicKey")

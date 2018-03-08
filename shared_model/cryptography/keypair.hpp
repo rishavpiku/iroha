@@ -18,12 +18,15 @@
 #ifndef IROHA_SHARED_MODEL_KEYPAIR_HPP
 #define IROHA_SHARED_MODEL_KEYPAIR_HPP
 
+#include "common/types.hpp"
 #include "cryptography/private_key.hpp"
 #include "cryptography/public_key.hpp"
 #include "interfaces/base/primitive.hpp"
 #include "utils/string_builder.hpp"
 
-#include "common/types.hpp"
+#ifndef DISABLE_BACKWARD
+#include "model/compatibility/make_old_model.hpp"
+#endif
 
 namespace shared_model {
   namespace crypto {
@@ -74,11 +77,9 @@ namespace shared_model {
       }
 
 #ifndef DISABLE_BACKWARD
-      interface::Primitive<Keypair, iroha::keypair_t>::OldModelType *
-      makeOldModel() const override {
-        return new iroha::keypair_t{
-            publicKey().makeOldModel<PublicKey::OldPublicKeyType>(),
-            privateKey().makeOldModel<PrivateKey::OldPrivateKeyType>()};
+      iroha::keypair_t *makeOldModel() const override {
+        using iroha::model::compatibility::makeOldModel;
+        return makeOldModel(*this);
       }
 
 #endif
