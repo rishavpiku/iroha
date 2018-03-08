@@ -35,7 +35,7 @@ namespace shared_model {
      */
     template <typename FieldValidator, typename TransactionValidator>
     class ProposalValidator
-        : public ContainerValidator<FieldValidator, TransactionValidator> {
+        : public ContainerValidator<interface::Proposal, FieldValidator, TransactionValidator> {
      public:
       /**
        * Applies validation on proposal
@@ -43,12 +43,10 @@ namespace shared_model {
        * @return Answer containing found error if any
        */
       Answer validate(const interface::Proposal &prop) const {
-        Answer answer;
+        auto answer = ContainerValidator<interface::Proposal, FieldValidator, TransactionValidator>::validate(prop, "Proposal");
         ReasonsGroupType reason;
         reason.first = "Proposal";
         this->field_validator_.validateCreatedTime(reason, prop.created_time());
-        this->validateHeight(reason, prop.height());
-        this->validateTransactions(reason, prop.transactions());
         if (not reason.second.empty()) {
           answer.addReason(std::move(reason));
         }

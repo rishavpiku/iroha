@@ -36,7 +36,7 @@ namespace shared_model {
      */
     template <typename FieldValidator, typename TransactionValidator>
     class BlockValidator
-        : public ContainerValidator<FieldValidator, TransactionValidator> {
+        : public ContainerValidator<interface::Block, FieldValidator, TransactionValidator> {
      public:
       /**
        * Applies validation on block
@@ -44,12 +44,10 @@ namespace shared_model {
        * @return Answer containing found error if any
        */
       Answer validate(const interface::Block &block) const {
-        Answer answer;
+        auto answer = ContainerValidator<interface::Block, FieldValidator, TransactionValidator>::validate(block, "Block");
         ReasonsGroupType reason;
         reason.first = "Block";
         this->field_validator_.validateCreatedTime(reason, block.createdTime());
-        this->validateHeight(reason, block.height());
-        this->validateTransactions(reason, block.transactions());
         if (not reason.second.empty()) {
           answer.addReason(std::move(reason));
         }

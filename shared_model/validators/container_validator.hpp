@@ -32,7 +32,7 @@ namespace shared_model {
     /**
      * Class that validates blocks and proposal common fieds
      */
-    template <typename FieldValidator, typename TransactionValidator>
+    template <typename Iface, typename FieldValidator, typename TransactionValidator>
     class ContainerValidator {
      protected:
       void validateHeight(ReasonsGroupType &reason,
@@ -71,9 +71,19 @@ namespace shared_model {
           const FieldValidator &field_validator = FieldValidator())
           : transaction_validator_(transaction_validator),
             field_validator_(field_validator) {}
-
+      Answer validate(const Iface &cont, std::string reason_name) const {
+        Answer answer;
+        ReasonsGroupType reason;
+        reason.first = reason_name;
+        validateHeight(reason, cont.height());
+        validateTransactions(reason, cont.transactions());
+        if (not reason.second.empty()) {
+          answer.addReason(std::move(reason));
+        }
+        return answer;
+      }
+     private:
       TransactionValidator transaction_validator_;
-
      protected:
       FieldValidator field_validator_;
     };
