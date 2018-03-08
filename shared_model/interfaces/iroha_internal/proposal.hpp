@@ -67,6 +67,7 @@ namespace shared_model {
 
         auto oldModel = new iroha::model::Proposal(txs);
         oldModel->height = height();
+        oldModel->created_time = created_time();
         return oldModel;
       }
 #endif

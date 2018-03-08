@@ -103,7 +103,6 @@ TEST_F(SimulatorTest, ValidWhenPreviousBlock) {
                                            .build()
                                            .makeOldModel());
   auto proposal = *proposal_p;
-  proposal.created_time = iroha::time::now();
   shared_model::proto::Block block = makeBlock(proposal.height - 1);
 
   EXPECT_CALL(*factory, createTemporaryWsv()).Times(1);
