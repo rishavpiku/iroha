@@ -76,7 +76,6 @@ namespace shared_model {
         ReasonsGroupType reason;
         reason.first = reason_name;
         field_validator_.validateCreatedTime(reason, cont.createdTime());
-        field_validator_.validateCreatedTime(reason, cont.createdTime());
         validateHeight(reason, cont.height());
         validateTransactions(reason, cont.transactions());
         if (not reason.second.empty()) {
