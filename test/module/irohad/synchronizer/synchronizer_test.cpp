@@ -16,12 +16,12 @@
  */
 
 #include "backend/protobuf/block.hpp"
-#include "backend/protobuf/from_old_model.hpp"
+#include "builders/protobuf/block.hpp"
 #include "framework/test_subscriber.hpp"
-#include "model/sha3_hash.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_mocks.hpp"
 #include "module/irohad/network/network_mocks.hpp"
 #include "module/irohad/validation/validation_mocks.hpp"
+#include "module/shared_model/builders/protobuf/test_block_builder.hpp"
 #include "synchronizer/impl/synchronizer_impl.hpp"
 #include "validation/chain_validator.hpp"
 
@@ -59,16 +59,6 @@ class SynchronizerTest : public ::testing::Test {
   std::shared_ptr<SynchronizerImpl> synchronizer;
 };
 
-// TODO: 14-02-2018 Alexey Chernyshov remove after
-// relocation to shared_model https://soramitsu.atlassian.net/browse/IR-903
-// hash of block should be initialised
-MATCHER_P(NewBlockMatcher,
-          block,
-          "is shared_model Block is equal to the old model Block ") {
-  std::unique_ptr<iroha::model::Block> old_block(arg.makeOldModel());
-  return *old_block == block;
-}
-
 TEST_F(SynchronizerTest, ValidWhenInitialized) {
   // synchronizer constructor => on_commit subscription called
   EXPECT_CALL(*consensus_gate, on_commit())
@@ -79,9 +69,9 @@ TEST_F(SynchronizerTest, ValidWhenInitialized) {
 
 TEST_F(SynchronizerTest, ValidWhenSingleCommitSynchronized) {
   // commit from consensus => chain validation passed => commit successful
-  Block test_block;
-  test_block.height = 5;
-  test_block.hash = iroha::hash(test_block);
+  std::shared_ptr<shared_model::interface::Block> test_block =
+      std::make_shared<shared_model::proto::Block>(
+          TestBlockBuilder().height(5).build());
 
   DefaultValue<expected::Result<std::unique_ptr<MutableStorage>, std::string>>::
       SetFactory(&createMockMutableStorage);
@@ -89,10 +79,7 @@ TEST_F(SynchronizerTest, ValidWhenSingleCommitSynchronized) {
 
   EXPECT_CALL(*mutable_factory, commit_(_)).Times(1);
 
-  // TODO: 14-02-2018 Alexey Chernyshov uncomment expected argument after
-  // relocation to shared_model https://soramitsu.atlassian.net/browse/IR-903
-  //  EXPECT_CALL(*chain_validator, validateBlock(testing::Ref(new_test_block), _))
-  EXPECT_CALL(*chain_validator, validateBlock(NewBlockMatcher(test_block), _))
+  EXPECT_CALL(*chain_validator, validateBlock(testing::Ref(*test_block), _))
       .WillOnce(Return(true));
 
   EXPECT_CALL(*block_loader, retrieveBlocks(_)).Times(0);
@@ -104,11 +91,11 @@ TEST_F(SynchronizerTest, ValidWhenSingleCommitSynchronized) {
 
   auto wrapper =
       make_test_subscriber<CallExact>(synchronizer->on_commit_chain(), 1);
-  wrapper.subscribe([&test_block](auto commit) {
+  wrapper.subscribe([test_block](auto commit) {
     auto block_wrapper = make_test_subscriber<CallExact>(commit, 1);
-    block_wrapper.subscribe([&test_block](auto block) {
+    block_wrapper.subscribe([test_block](auto block) {
       // Check commit block
-      ASSERT_EQ(block.height, test_block.height);
+      ASSERT_EQ(block->height(), test_block->height());
     });
     ASSERT_TRUE(block_wrapper.validate());
   });
@@ -120,7 +107,8 @@ TEST_F(SynchronizerTest, ValidWhenSingleCommitSynchronized) {
 
 TEST_F(SynchronizerTest, ValidWhenBadStorage) {
   // commit from consensus => storage not created => no commit
-  Block test_block;
+  std::shared_ptr<shared_model::interface::Block> test_block =
+      std::make_shared<shared_model::proto::Block>(TestBlockBuilder().build());
 
   DefaultValue<
       expected::Result<std::unique_ptr<MutableStorage>, std::string>>::Clear();
@@ -148,10 +136,16 @@ TEST_F(SynchronizerTest, ValidWhenBadStorage) {
 
 TEST_F(SynchronizerTest, ValidWhenBlockValidationFailure) {
   // commit from consensus => chain validation failed => commit successful
-  Block test_block;
-  test_block.height = 5;
-  test_block.sigs.emplace_back();
-  test_block.hash = iroha::hash(test_block);
+  std::shared_ptr<shared_model::interface::Block> test_block =
+      std::make_shared<shared_model::proto::Block>(
+          shared_model::proto::TemplateBlockBuilder<
+              (1 << shared_model::proto::TemplateBlockBuilder<>::total) - 1,
+              shared_model::validation::DefaultBlockValidator>()
+              .height(5)
+              .build()
+              .signAndAddSignature(
+                  shared_model::crypto::DefaultCryptoAlgorithmType::
+                      generateKeypair()));
 
   DefaultValue<expected::Result<std::unique_ptr<MutableStorage>, std::string>>::
       SetFactory(&createMockMutableStorage);
@@ -159,19 +153,13 @@ TEST_F(SynchronizerTest, ValidWhenBlockValidationFailure) {
 
   EXPECT_CALL(*mutable_factory, commit_(_)).Times(1);
 
-  // TODO: 14-02-2018 Alexey Chernyshov replace with expected argument after
-  // relocation to shared_model https://soramitsu.atlassian.net/browse/IR-903
-//  EXPECT_CALL(*chain_validator, validateBlock(testing::Ref(new_test_block), _))
-  EXPECT_CALL(*chain_validator, validateBlock(NewBlockMatcher(test_block), _))
+  EXPECT_CALL(*chain_validator, validateBlock(testing::Ref(*test_block), _))
       .WillOnce(Return(false));
 
   EXPECT_CALL(*chain_validator, validateChain(_, _)).WillOnce(Return(true));
 
   EXPECT_CALL(*block_loader, retrieveBlocks(_))
-      .WillOnce(Return(rxcpp::observable<>::just(
-          static_cast<std::shared_ptr<shared_model::interface::Block>>(
-              std::make_shared<shared_model::proto::Block>(
-                  shared_model::proto::from_old(test_block))))));
+      .WillOnce(Return(rxcpp::observable<>::just(test_block)));
 
   EXPECT_CALL(*consensus_gate, on_commit())
       .WillOnce(Return(rxcpp::observable<>::empty<Block>()));
@@ -180,11 +168,11 @@ TEST_F(SynchronizerTest, ValidWhenBlockValidationFailure) {
 
   auto wrapper =
       make_test_subscriber<CallExact>(synchronizer->on_commit_chain(), 1);
-  wrapper.subscribe([&test_block](auto commit) {
+  wrapper.subscribe([test_block](auto commit) {
     auto block_wrapper = make_test_subscriber<CallExact>(commit, 1);
-    block_wrapper.subscribe([&test_block](auto block) {
+    block_wrapper.subscribe([test_block](auto block) {
       // Check commit block
-      ASSERT_EQ(block.height, test_block.height);
+      ASSERT_EQ(block->height(), test_block->height());
     });
     ASSERT_TRUE(block_wrapper.validate());
   });

@@ -48,8 +48,7 @@ namespace iroha {
       return synchronizer_->on_commit_chain().map([](auto commit) -> Commit {
         return commit.map(
             [](auto block) -> std::shared_ptr<shared_model::interface::Block> {
-              return std::make_shared<shared_model::proto::Block>(
-                  shared_model::proto::from_old(block));
+              return block;
             });
       });
     }
