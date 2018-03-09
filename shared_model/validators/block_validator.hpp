@@ -45,17 +45,10 @@ namespace shared_model {
        * @return Answer containing found error if any
        */
       Answer validate(const interface::Block &block) const {
-        auto answer =
-            ContainerValidator<interface::Block,
-                               FieldValidator,
-                               TransactionValidator>::validate(block, "Block");
-        ReasonsGroupType reason;
-        reason.first = "Block";
-        this->field_validator_.validateCreatedTime(reason, block.createdTime());
-        if (not reason.second.empty()) {
-          answer.addReason(std::move(reason));
-        }
-        return answer;
+        return ContainerValidator<interface::Block,
+                                  FieldValidator,
+                                  TransactionValidator>::validate(block,
+                                                                  "Block");
       }
     };
 

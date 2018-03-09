@@ -44,18 +44,10 @@ namespace shared_model {
        * @return Answer containing found error if any
        */
       Answer validate(const interface::Proposal &prop) const {
-        auto answer =
-            ContainerValidator<interface::Proposal,
-                               FieldValidator,
-                               TransactionValidator>::validate(prop,
-                                                               "Proposal");
-        ReasonsGroupType reason;
-        reason.first = "Proposal";
-        this->field_validator_.validateCreatedTime(reason, prop.created_time());
-        if (not reason.second.empty()) {
-          answer.addReason(std::move(reason));
-        }
-        return answer;
+        return ContainerValidator<interface::Proposal,
+                                  FieldValidator,
+                                  TransactionValidator>::validate(prop,
+                                                                  "Proposal");
       }
     };
 
