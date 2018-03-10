@@ -21,20 +21,30 @@ RUN apt-get -y --no-install-recommends install build-essential python-software-p
         # dev dependencies
         libssl-dev zlib1g-dev libc6-dbg golang \
         # CircleCI dependencies
-        git ssh tar gzip ca-certificates python3 python3-pip python3-setuptools \
+        git ssh tar gzip ca-certificates python python-pip python3-setuptools \
         # code coverage
         lcov \
         # other
-        wget curl file unzip gdb iputils-ping vim ccache \
+        wget libcurl4-openssl-dev curl file unzip gdb iputils-ping vim ccache \
+        valgrind tmux \
+        # clang tooling dependencies
+	    gcc-multilib python-virtualenv python-dev python-setuptools thrift-compiler \
+	    # psrecord dependencies
+	    python-matplotlib python-tk \
+	    # analysis dependencies
         gcovr cppcheck doxygen graphviz graphviz-dev; \
     apt-get -y clean
 
-RUN pip3 install --upgrade pip; \
-    pip3 install flask requests
 
-# install cmake 3.5.1
+# install pip dependencies: should be separated
+RUN pip install --upgrade pip; \
+    pip install wheel; \
+    pip install psutil; \
+    pip install psrecord
+
+# install cmake 3.7.2
 RUN git clone https://gitlab.kitware.com/cmake/cmake.git /tmp/cmake; \
-    (cd /tmp/cmake ; git checkout 64130a7e793483e24c1d68bdd234f81d5edb2d51); \
+    (cd /tmp/cmake ; git checkout 35413bf2c1b33980afd418030af27f184872af6b); \
     (cd /tmp/cmake ; /tmp/cmake/bootstrap --parallel=${PARALLELISM} --enable-ccache); \
     make -j${PARALLELISM} -C /tmp/cmake; \
     make -C /tmp/cmake install; \
@@ -43,8 +53,7 @@ RUN git clone https://gitlab.kitware.com/cmake/cmake.git /tmp/cmake; \
 # install boost 1.65.1
 RUN git clone https://github.com/boostorg/boost /tmp/boost; \
     (cd /tmp/boost ; git checkout 436ad1dfcfc7e0246141beddd11c8a4e9c10b146); \
-    (cd /tmp/boost ; git submodule init); \
-    (cd /tmp/boost ; git submodule update --recursive -j ${PARALLELISM}); \
+    (cd /tmp/boost ; git submodule update --init --recursive); \
     (cd /tmp/boost ; /tmp/boost/bootstrap.sh --with-libraries=system,filesystem); \
     (cd /tmp/boost ; /tmp/boost/b2 headers); \
     (cd /tmp/boost ; /tmp/boost/b2 cxxflags="-std=c++14" -j ${PARALLELISM} install); \
@@ -55,7 +64,6 @@ RUN git clone https://github.com/google/protobuf /tmp/protobuf; \
     (cd /tmp/protobuf ; git checkout 80a37e0782d2d702d52234b62dd4b9ec74fd2c95); \
     cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -H/tmp/protobuf/cmake -B/tmp/protobuf/.build; \
     cmake --build /tmp/protobuf/.build --target install -- -j${PARALLELISM}; \
-    ldconfig; \
     rm -rf /tmp/protobuf
 
 # install gflags
@@ -70,7 +78,6 @@ RUN git clone https://github.com/c-ares/c-ares /tmp/c-ares; \
     (cd /tmp/c-ares ; git checkout 3be1924221e1326df520f8498d704a5c4c8d0cce); \
     cmake -H/tmp/c-ares -B/tmp/c-ares/build; \
     cmake --build /tmp/c-ares/build --target install -- -j${PARALLELISM}; \
-    ldconfig; \
     rm -rf /tmp/c-ares
     
 # install grpc
@@ -80,7 +87,6 @@ RUN git clone https://github.com/grpc/grpc /tmp/grpc; \
     cmake -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DgRPC_SSL_PROVIDER=package \
         -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_GFLAGS_PROVIDER=package -DBUILD_SHARED_LIBS=ON -H/tmp/grpc -B/tmp/grpc/.build; \
     cmake --build /tmp/grpc/.build --target install -- -j${PARALLELISM}; \
-    ldconfig; \
     rm -rf /tmp/grpc
 
 # install gtest
@@ -89,6 +95,50 @@ RUN git clone https://github.com/google/googletest /tmp/googletest; \
     cmake -H/tmp/googletest -B/tmp/googletest/build; \
     cmake --build /tmp/googletest/build --target install -- -j${PARALLELISM}; \
     rm -rf /tmp/googletest
+
+## START OF CLANG STATIC ANALYZERS
+# install llvm https://github.com/mikael-s-persson/templight/issues/60 for clang-tidy and templight
+RUN git clone --progress https://git.llvm.org/git/llvm.git  /tmp/llvm; \
+    git clone --progress https://git.llvm.org/git/clang.git /tmp/llvm/tools/clang; \
+    # templight
+    git clone --progress https://github.com/mikael-s-persson/templight /tmp/llvm/tools/clang/tools/templight; \
+    # clang-tidy
+    git clone --progress https://git.llvm.org/git/clang-tools-extra.git /tmp/llvm/tools/clang/tools/extra; \
+    # select specific versions
+    (cd /tmp/llvm; git checkout 930bcc9bdfb9542a292c3de874d7e6ba1464cfe0); \
+    (cd /tmp/llvm/tools/clang; git checkout 6eb4766e65557933c30152738c47e6ff34a1d216); \
+    (cd /tmp/llvm/tools/clang/tools/templight; git checkout 1478d7a1a60174819ede4c9aba92d171674cb9ab); \
+    (cd /tmp/llvm/tools/clang/tools/extra; git checkout 8c4d43360108f2bc711257d68cbc90935af23bd9);\
+    # patch clang to include templight, clang is included automatically
+    (cd /tmp/llvm/tools/clang/tools; echo "add_clang_subdirectory(templight)" >> CMakeLists.txt); \
+    # patch clang to exclude clang-query, it fails build (ugh!)
+    sed -i "/add_subdirectory(clang-query)/d" extra/CMakeLists.txt
+
+
+# build llvm and install clang tools
+RUN cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DLLVM_INCLUDE_GO_TESTS=OFF \
+        -DLLVM_INCLUDE_EXAMPLES=OFF \
+        -DLLVM_INCLUDE_TESTS=OFF \
+        -DLLVM_INCLUDE_DOCS=OFF \
+        -DLLVM_ENABLE_OCAMLDOC=OFF \
+        -DLLVM_TARGETS_TO_BUILD="X86" \
+        -DLLVM_BINDINGS_LIST="" \
+        -H/tmp/llvm \
+        -B/tmp/llvm/build; \
+    cmake --build /tmp/llvm/build --target install -- -j${PARALLELISM}; \
+    echo 'export PATH="/usr/local/libexec:$PATH"' >> /etc/profile
+
+
+# GUI for clang tools
+RUN git clone https://github.com/Ericsson/CodeChecker.git --depth 1 /opt/codechecker; \
+    cd /opt/codechecker; \
+    pip install -r .ci/basic_python_requirements; \
+    make package; \
+    echo 'export PATH="/opt/codechecker/build/CodeChecker/bin:$PATH"' >> /etc/profile
+
+## END OF CLANG STATIC ANALYZERS
 
 # install spdlog v0.16.3
 RUN git clone https://github.com/gabime/spdlog /tmp/spdlog; \
@@ -143,7 +193,6 @@ RUN git clone https://github.com/01org/tbb /tmp/tbb; \
     cp /tmp/tbb/build/build_debug/*.so* /usr/local/lib; \
     cp /tmp/tbb/build/build_release/*.so* /usr/local/lib; \
     cp -r /tmp/tbb/include/* /usr/local/include; \
-    ldconfig; \
     rm -rf /tmp/tbb
 
 # install docker
@@ -163,27 +212,11 @@ RUN mkdir -p /opt/sonar; \
     ln -s -f /opt/sonar/scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner; \
     rm -rf /tmp/sonar*
 
-# install sonar build wrapper
-RUN curl -L -o /tmp/sonar-build-wrapper.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip; \
-    unzip -o -d /tmp/sonar-build-wrapper /tmp/sonar-build-wrapper.zip; \
-    mv /tmp/sonar-build-wrapper/build-wrapper-linux-x86 /opt/sonar/build-wrapper; \
-    ln -s -f /opt/sonar/build-wrapper/build-wrapper-linux-x86-64 /usr/local/bin/sonar-build-wrapper; \
-    rm -rf /tmp/sonar*
-
-# install latest valgrind
-RUN git clone git://sourceware.org/git/valgrind.git /tmp/valgrind; \
-    (cd /tmp/valgrind ; /tmp/valgrind/autogen.sh); \
-    (cd /tmp/valgrind ; /tmp/valgrind/configure); \
-    make -j${PARALLELISM} -C /tmp/valgrind; \
-    make -C /tmp/valgrind install; \
-    rm -rf /tmp/valgrind
-
 # install ed25519
 RUN git clone git://github.com/hyperledger/iroha-ed25519.git /tmp/ed25519; \
     (cd /tmp/ed25519 ; git checkout e7188b8393dbe5ac54378610d53630bd4a180038); \
     cmake -DCMAKE_BUILD_TYPE=Debug -DTESTING=OFF -H/tmp/ed25519 -B/tmp/ed25519/build; \
     cmake --build /tmp/ed25519/build --target install -- -j${PARALLELISM}; \
-    ldconfig; \
     rm -rf /tmp/ed25519
 
 # non-interactive adduser
@@ -197,7 +230,11 @@ RUN useradd -ms /bin/bash iroha-ci -u 1000 -U
 
 WORKDIR /opt/iroha
 RUN chmod -R 777 /opt/iroha; \
-    mkdir -p /tmp/ccache -m 777;
+    mkdir -p /tmp/ccache -m 777; \
+    ldconfig; \
+    # remove build cache from dependencies
+    ccache --clear
+    
 
 USER iroha-ci
 CMD ["/bin/bash"]
