@@ -108,12 +108,13 @@ RUN git clone --progress https://git.llvm.org/git/llvm.git  /tmp/llvm; \
     (cd /tmp/llvm; git checkout 930bcc9bdfb9542a292c3de874d7e6ba1464cfe0); \
     (cd /tmp/llvm/tools/clang; git checkout 6eb4766e65557933c30152738c47e6ff34a1d216); \
     (cd /tmp/llvm/tools/clang/tools/templight; git checkout 1478d7a1a60174819ede4c9aba92d171674cb9ab); \
-    (cd /tmp/llvm/tools/clang/tools/extra; git checkout 8c4d43360108f2bc711257d68cbc90935af23bd9);\
-    # patch clang to include templight, clang is included automatically
-    (cd /tmp/llvm/tools/clang/tools; echo "add_clang_subdirectory(templight)" >> CMakeLists.txt); \
+    (cd /tmp/llvm/tools/clang/tools/extra; git checkout 8c4d43360108f2bc711257d68cbc90935af23bd9)
+
+# patch clang to include templight, clang is included automatically
+RUN cd /tmp/llvm/tools/clang/tools; \
+    echo "add_clang_subdirectory(templight)" >> CMakeLists.txt; \
     # patch clang to exclude clang-query, it fails build (ugh!)
     sed -i "/add_subdirectory(clang-query)/d" extra/CMakeLists.txt
-
 
 # build llvm and install clang tools
 RUN cmake \
