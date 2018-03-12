@@ -1,5 +1,5 @@
 /**
- * Copyright Soramitsu Co., Ltd. 2017 All Rights Reserved.
+ * Copyright Soramitsu Co., Ltd. 2018 All Rights Reserved.
  * http://soramitsu.co.jp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-//TODO: Solonets / / Satisfy disabled test
+// TODO: Solonets / / Satisfy disabled test
 
 #include "backend/protobuf/transaction.hpp"
 #include "builders/protobuf/queries.hpp"
@@ -26,19 +26,14 @@
 #include "framework/integration_framework/integration_test_framework.hpp"
 #include "integration/pipeline/tx_pipeline_integration_test_fixture.hpp"
 #include "model/generators/query_generator.hpp"
-#include "responses.pb.h"
 #include "module/shared_model/builders/protobuf/test_transaction_builder.hpp"
-
-using namespace iroha::model::generators;
-using namespace iroha::model::converters;
+#include "responses.pb.h"
 
 constexpr auto kAdmin = "admin@test";
 constexpr auto kNonUser = "nonuser@test";
 constexpr auto kAsset = "coin#test";
-const auto kAdminOldKeypair = iroha::create_keypair();
-const shared_model::crypto::Keypair kAdminKeypair(
-    shared_model::crypto::PublicKey(kAdminOldKeypair.pubkey.to_string()),
-    shared_model::crypto::PrivateKey(kAdminOldKeypair.privkey.to_string()));
+const shared_model::crypto::Keypair kAdminKeypair =
+    shared_model::crypto::DefaultCryptoAlgorithmType::generateKeypair();
 auto checkStatelessValid = [](auto &status) {
   ASSERT_NO_THROW(
       boost::get<shared_model::detail::PolymorphicWrapper<
@@ -49,7 +44,6 @@ auto checkStatelessInvalid = [](auto &status) {
       boost::get<shared_model::detail::PolymorphicWrapper<
           shared_model::interface::StatelessFailedTxResponse>>(status.get()));
 };
-
 auto checkProposal = [](auto &proposal) {
   ASSERT_EQ(proposal->transactions.size(), 1);
 
@@ -148,12 +142,12 @@ TEST(AcceptanceTest, DISABLED_MaxTxCounter) {
  */
 TEST(AcceptanceTest, Transaction1HourOld) {
   auto tx = shared_model::proto::TransactionBuilder()
-      .txCounter(2)
-      .createdTime(iroha::time::now(std::chrono::hours(-1)))
-      .creatorAccountId(kAdmin)
-      .addAssetQuantity(kAdmin, kAsset, "1.0")
-      .build()
-      .signAndAddSignature(kAdminKeypair);
+                .txCounter(2)
+                .createdTime(iroha::time::now(std::chrono::hours(-1)))
+                .creatorAccountId(kAdmin)
+                .addAssetQuantity(kAdmin, kAsset, "1.0")
+                .build()
+                .signAndAddSignature(kAdminKeypair);
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessValid)
@@ -169,14 +163,13 @@ TEST(AcceptanceTest, Transaction1HourOld) {
  */
 TEST(AcceptanceTest, DISABLED_TransactionLess24HourOld) {
   auto tx = shared_model::proto::TransactionBuilder()
-      .txCounter(2)
-      .createdTime(iroha::time::now(
-          std::chrono::hours(24) - std::chrono::minutes(1)
-      ))
-      .creatorAccountId(kAdmin)
-      .addAssetQuantity(kAdmin, kAsset, "1.0")
-      .build()
-      .signAndAddSignature(kAdminKeypair);
+                .txCounter(2)
+                .createdTime(iroha::time::now(std::chrono::hours(24)
+                                              - std::chrono::minutes(1)))
+                .creatorAccountId(kAdmin)
+                .addAssetQuantity(kAdmin, kAsset, "1.0")
+                .build()
+                .signAndAddSignature(kAdminKeypair);
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessValid)
@@ -198,8 +191,7 @@ TEST(AcceptanceTest, TransactionMore24HourOld) {
                     .creatorAccountId(kAdmin)
                     .addAssetQuantity(kAdmin, kAsset, "1.0")
                     .build()
-                    .signAndAddSignature(kAdminKeypair);
-  );
+                    .signAndAddSignature(kAdminKeypair););
   auto tx = TestUnsignedTransactionBuilder()
                 .txCounter(2)
                 .createdTime(iroha::time::now(std::chrono::hours(24)
@@ -207,7 +199,7 @@ TEST(AcceptanceTest, TransactionMore24HourOld) {
                 .creatorAccountId(kAdmin)
                 .addAssetQuantity(kAdmin, kAsset, "1.0")
                 .build()
-      .signAndAddSignature(kAdminKeypair);
+                .signAndAddSignature(kAdminKeypair);
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessInvalid)
@@ -249,8 +241,7 @@ TEST(AcceptanceTest, Transaction10MinutesFromFuture) {
                     .creatorAccountId(kAdmin)
                     .addAssetQuantity(kAdmin, kAsset, "1.0")
                     .build()
-                    .signAndAddSignature(kAdminKeypair);
-  );
+                    .signAndAddSignature(kAdminKeypair););
   auto tx = TestUnsignedTransactionBuilder()
                 .txCounter(2)
                 .createdTime(iroha::time::now(std::chrono::minutes(10)))
@@ -280,11 +271,13 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptyPubKey) {
   auto signedBlob = shared_model::crypto::CryptoSigner<>::sign(
       shared_model::crypto::Blob(tx.payload()), kAdminKeypair);
   iroha::protocol::Signature protosig;
-  protosig.set_pubkey(shared_model::crypto::toBinaryString(shared_model::crypto::PublicKey("")));
-  protosig.set_signature(shared_model::crypto::toBinaryString(signedBlob));
+  protosig.set_pubkey(shared_model::crypto::toBinaryString(
+      shared_model::crypto::PublicKey("")));
+  protosig.set_signature("");
   auto *s1 = new shared_model::proto::Signature(protosig);
-  tx.addSignature(shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
-      s1));
+  tx.addSignature(
+      shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
+          s1));
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessInvalid)
@@ -304,8 +297,10 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptySignedblob) {
           .addAssetQuantity(kAdmin, kAsset, "1.0")
           .build();
   iroha::protocol::Signature protosig;
-  protosig.set_pubkey(shared_model::crypto::toBinaryString(kAdminKeypair.publicKey()));
-  protosig.set_signature(shared_model::crypto::toBinaryString(shared_model::crypto::Blob("")));
+  protosig.set_pubkey(
+      shared_model::crypto::toBinaryString(kAdminKeypair.publicKey()));
+  protosig.set_signature(
+      shared_model::crypto::toBinaryString(shared_model::crypto::Blob("")));
   auto *s1 = new shared_model::proto::Signature(protosig);
   tx.addSignature(
       shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
@@ -331,11 +326,13 @@ TEST(AcceptanceTest, DISABLED_TransactionInvalidPublicKey) {
   auto signedBlob = shared_model::crypto::CryptoSigner<>::sign(
       shared_model::crypto::Blob(tx.payload()), kAdminKeypair);
   iroha::protocol::Signature protosig;
-  protosig.set_pubkey(shared_model::crypto::toBinaryString(shared_model::crypto::PublicKey(std::string(32, 'a'))));
+  protosig.set_pubkey(shared_model::crypto::toBinaryString(
+      shared_model::crypto::PublicKey(std::string(32, 'a'))));
   protosig.set_signature(shared_model::crypto::toBinaryString(signedBlob));
   auto *s1 = new shared_model::proto::Signature(protosig);
-  tx.addSignature(shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
-      s1));
+  tx.addSignature(
+      shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
+          s1));
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessInvalid)
@@ -357,14 +354,16 @@ TEST(AcceptanceTest, DISABLED_TransactionInvalidSignedBlob) {
   auto signedBlob = shared_model::crypto::CryptoSigner<>::sign(
       shared_model::crypto::Blob(tx.payload()), kAdminKeypair);
   iroha::protocol::Signature protosig;
-  protosig.set_pubkey(shared_model::crypto::toBinaryString(kAdminKeypair.publicKey()));
+  protosig.set_pubkey(
+      shared_model::crypto::toBinaryString(kAdminKeypair.publicKey()));
   auto raw = signedBlob.blob();
-  raw[0] = (raw[0] + 1) % std::numeric_limits<uint8_t>::max();
+  raw[0] = (raw[0] == std::numeric_limits<uint8_t>::max() ? raw[0] + 1 : 0);
   auto wrongBlob = shared_model::crypto::Blob(raw);
   protosig.set_signature(shared_model::crypto::toBinaryString(wrongBlob));
   auto *s1 = new shared_model::proto::Signature(protosig);
-  tx.addSignature(shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
-      s1));
+  tx.addSignature(
+      shared_model::detail::PolymorphicWrapper<shared_model::proto::Signature>(
+          s1));
   integration_framework::IntegrationTestFramework(1)
       .setInitialState(kAdminKeypair)
       .sendTx(tx, checkStatelessInvalid)
