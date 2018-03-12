@@ -85,7 +85,7 @@ rxcpp::observable<std::shared_ptr<Block>> BlockLoaderImpl::retrieveBlocks(
           auto result = std::make_shared<shared_model::proto::Block>(block);
 
           // stateless validation of block
-          auto answer = stateless_validator_->validate(result);
+          auto answer = stateless_validator_->validate(*result);
           if (answer.hasErrors()) {
             log_->error(answer.reason());
             context.TryCancel();
@@ -136,7 +136,7 @@ nonstd::optional<std::shared_ptr<Block>> BlockLoaderImpl::retrieveBlock(
   }
 
   // stateless validation of block
-  auto answer = stateless_validator_->validate(result);
+  auto answer = stateless_validator_->validate(*result);
   if (answer.hasErrors()) {
     log_->error(answer.reason());
     return nonstd::nullopt;
