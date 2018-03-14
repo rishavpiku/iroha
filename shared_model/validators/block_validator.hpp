@@ -19,7 +19,7 @@
 #define IROHA_BLOCK_VALIDATOR_HPP
 
 #include <boost/format.hpp>
-#include "container_validator.hpp"
+#include "validators/container_validator.hpp"
 #include "datetime/time.hpp"
 #include "interfaces/common_objects/types.hpp"
 #include "interfaces/iroha_internal/block.hpp"
