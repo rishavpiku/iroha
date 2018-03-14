@@ -69,9 +69,9 @@ TEST_F(SynchronizerTest, ValidWhenInitialized) {
 
 TEST_F(SynchronizerTest, ValidWhenSingleCommitSynchronized) {
   // commit from consensus => chain validation passed => commit successful
+  auto block = TestBlockBuilder().height(5).build();
   std::shared_ptr<shared_model::interface::Block> test_block =
-      std::make_shared<shared_model::proto::Block>(
-          TestBlockBuilder().height(5).build());
+      std::make_shared<shared_model::proto::Block>(std::move(block));
 
   DefaultValue<expected::Result<std::unique_ptr<MutableStorage>, std::string>>::
       SetFactory(&createMockMutableStorage);
@@ -136,16 +136,10 @@ TEST_F(SynchronizerTest, ValidWhenBadStorage) {
 
 TEST_F(SynchronizerTest, ValidWhenBlockValidationFailure) {
   // commit from consensus => chain validation failed => commit successful
+  auto block = TestUnsignedBlockBuilder().height(5).build().signAndAddSignature(
+      shared_model::crypto::DefaultCryptoAlgorithmType::generateKeypair());
   std::shared_ptr<shared_model::interface::Block> test_block =
-      std::make_shared<shared_model::proto::Block>(
-          shared_model::proto::TemplateBlockBuilder<
-              (1 << shared_model::proto::TemplateBlockBuilder<>::total) - 1,
-              shared_model::validation::DefaultBlockValidator>()
-              .height(5)
-              .build()
-              .signAndAddSignature(
-                  shared_model::crypto::DefaultCryptoAlgorithmType::
-                      generateKeypair()));
+      std::make_shared<shared_model::proto::Block>(std::move(block));
 
   DefaultValue<expected::Result<std::unique_ptr<MutableStorage>, std::string>>::
       SetFactory(&createMockMutableStorage);

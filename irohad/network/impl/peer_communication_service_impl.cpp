@@ -45,12 +45,7 @@ namespace iroha {
     }
 
     rxcpp::observable<Commit> PeerCommunicationServiceImpl::on_commit() const {
-      return synchronizer_->on_commit_chain().map([](auto commit) -> Commit {
-        return commit.map(
-            [](auto block) -> std::shared_ptr<shared_model::interface::Block> {
-              return block;
-            });
-      });
+      return synchronizer_->on_commit_chain();
     }
   }  // namespace network
 }  // namespace iroha

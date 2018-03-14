@@ -74,7 +74,7 @@ namespace iroha {
       } else {
         // Block can't be applied to current storage
         // Download all missing blocks
-        for (auto signature : commit_message->signatures()) {
+        for (const auto &signature : commit_message->signatures()) {
           auto storageResult = mutableFactory_->createMutableStorage();
           std::unique_ptr<ametsuchi::MutableStorage> storage;
           storageResult.match(
@@ -92,8 +92,7 @@ namespace iroha {
           if (validator_->validateChain(chain, *storage)) {
             // Peer send valid chain
             mutableFactory_->commit(std::move(storage));
-            notifier_.get_subscriber().on_next(
-                chain.map([](auto block) { return block; }));
+            notifier_.get_subscriber().on_next(chain);
             // You are synchronized
             return;
           }
