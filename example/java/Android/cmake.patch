@@ -1,0 +1,90 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8b0d7467d..ed7c0f9e8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,8 +106,8 @@ endif()
+ 
+ add_subdirectory(schema)
+ add_subdirectory(libs)
+-add_subdirectory(irohad)
+-add_subdirectory(iroha-cli)
++#add_subdirectory(irohad)
++#add_subdirectory(iroha-cli)
+ add_subdirectory(shared_model)
+ 
+ if(TESTING)
+diff --git a/cmake/dependencies.cmake b/cmake/dependencies.cmake
+index 69ac283..4c0cad8 100644
+--- a/cmake/dependencies.cmake
++++ b/cmake/dependencies.cmake
+@@ -20,7 +20,7 @@ endif ()
+ #############################
+ #         speedlog          #
+ #############################
+-find_package(spdlog)
++#find_package(spdlog)
+
+ ################################
+ #           protobuf           #
+@@ -32,50 +32,50 @@ find_package(protobuf)
+ #         gRPC          #
+ #########################
+ option(FIND_GRPC "Try to find gRPC in system" ON)
+-find_package(grpc)
++#find_package(grpc)
+
+ ################################
+ #          rapidjson           #
+ ################################
+-find_package(rapidjson)
++#find_package(rapidjson)
+
+ ##########################
+ #           pq           #
+ ##########################
+-find_package(pq)
++#find_package(pq)
+
+ ##########################a
+ #          pqxx          #
+ ##########################
+-find_package(pqxx)
++#find_package(pqxx)
+
+ ################################
+ #            gflags            #
+ ################################
+-find_package(gflags)
++#find_package(gflags)
+
+ ##########################
+ #        rx c++          #
+ ##########################
+-find_package(rxcpp)
++#find_package(rxcpp)
+
+ ##########################
+ #          TBB           #
+ ##########################
+-find_package(tbb)
++#find_package(tbb)
+
+ ##########################
+ #         boost          #
+ ##########################
+ find_package(Boost 1.65.0 REQUIRED
+-    COMPONENTS
+-    filesystem
+-    system
++    #COMPONENTS
++    #filesystem
++    #system
+     )
+ add_library(boost INTERFACE IMPORTED)
+ set_target_properties(boost PROPERTIES
+     INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS}
+-    INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
++    #INTERFACE_LINK_LIBRARIES "${Boost_LIBRARIES}"
+     )
+
+ if(ENABLE_LIBS_PACKAGING)
