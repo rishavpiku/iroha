@@ -58,5 +58,5 @@ cmake --build ./iroha/shared_model/build --target irohajava
 
 # copy artifacts
 mkdir lib
-zip ./lib/bindings.zip ./iroha/shared_model/build/shared_model/bindings/*.java
-cp ./iroha/shared_model/build/shared_model/bindings/libirohajava.so ./lib
+zip ./lib/bindings.zip ./iroha/shared_model/build/bindings/*.java
+cp ./iroha/shared_model/build/bindings/libirohajava.so ./lib
