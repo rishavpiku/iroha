@@ -53,7 +53,6 @@ sed -i.bak "s~swig_link_libraries(irohajava~swig_link_libraries(irohajava $(pwd)
 
 # build iroha
 sed -i.bak "s~find_program(protoc_EXECUTABLE protoc~set(protoc_EXECUTABLE $(pwd)/protobuf/host_build/protoc~" ./iroha/cmake/Modules/Findprotobuf.cmake # use host protoc
-(cd ./iroha ; git apply ../cmake.patch)
 cmake -H./iroha -B./iroha/build ${ANDROID_TOOLCHAIN_ARGS} -DTESTING=OFF -DSHARED_MODEL_DISABLE_COMPATIBILITY=ON -DSWIG_JAVA=ON -DCMAKE_PREFIX_PATH=${DEPS_DIR}
 cmake --build ./iroha/build --target irohajava
 
