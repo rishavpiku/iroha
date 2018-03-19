@@ -53,10 +53,10 @@ sed -i.bak "s~swig_link_libraries(irohajava~swig_link_libraries(irohajava $(pwd)
 
 # build iroha
 sed -i.bak "s~find_program(protoc_EXECUTABLE protoc~set(protoc_EXECUTABLE $(pwd)/protobuf/host_build/protoc~" ./iroha/cmake/Modules/Findprotobuf.cmake # use host protoc
-cmake -H./iroha -B./iroha/build ${ANDROID_TOOLCHAIN_ARGS} -DTESTING=OFF -DSHARED_MODEL_DISABLE_COMPATIBILITY=ON -DSWIG_JAVA=ON -DCMAKE_PREFIX_PATH=${DEPS_DIR}
-cmake --build ./iroha/build --target irohajava
+cmake -H./iroha -B./iroha/shared_model/build ${ANDROID_TOOLCHAIN_ARGS} -DTESTING=OFF -DSHARED_MODEL_DISABLE_COMPATIBILITY=ON -DSWIG_JAVA=ON -DCMAKE_PREFIX_PATH=${DEPS_DIR}
+cmake --build ./iroha/shared_model/build --target irohajava
 
 # copy artifacts
 mkdir lib
-zip ./lib/bindings.zip ./iroha/build/shared_model/bindings/*.java
-cp ./iroha/build/shared_model/bindings/libirohajava.so ./lib
+zip ./lib/bindings.zip ./iroha/shared_model/build/shared_model/bindings/*.java
+cp ./iroha/shared_model/build/shared_model/bindings/libirohajava.so ./lib
