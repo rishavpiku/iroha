@@ -1,15 +1,40 @@
 #!/bin/sh
 set -ex
 PLATFORM=$1
-NDK_PATH=$2
-PACKAGE=$3
-if [ "$#" -ne 3 ]; then
+VERSION=$2
+NDK_PATH=$3
+PACKAGE=$4
+if [ "$#" -ne 4 ]; then
     echo "Illegal number of parameters"
-    echo "Usage: ./android-build.sh <PLATFORM> <NDK_PATH> <PACKAGE>"
-    echo "Example: ./android-build.sh arm64-v8a /Users/me/Downloads/android-ndk-r16b jp.co.soramitsu.yuna.bindings"
+    echo "Usage: ./android-build.sh <PLATFORM> <ANDROID_VERSION> <NDK_PATH> <PACKAGE>"
+    echo "Example: ./android-build.sh arm64-v8a 26 /Users/me/Downloads/android-ndk-r16b jp.co.soramitsu.yuna.bindings"
     exit 1
 fi
-ANDROID_TOOLCHAIN_ARGS="-DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=26 -DCMAKE_ANDROID_ARCH_ABI=${PLATFORM} -DANDROID_NDK=${NDK_PATH} -DCMAKE_ANDROID_STL_TYPE=c++_static"
+LIBP=lib
+case "$PLATFORM" in
+  armeabi)
+    ARCH=arch-arm
+    ;;
+  armeabi-v7a)
+    ARCH=arch-arm
+    ;;  	
+  arm64-v8a)
+    ARCH=arch-arm64
+    LIBP+=64
+    ;;
+  x86)
+    ARCH=arch-x86
+    ;;
+  x86_64)
+    ARCH=arch-x86_64
+    LIBP+=64
+    ;;
+  *)
+	echo "Wrong ABI name: ${PLATFORM}"
+    exit 1
+    ;;
+esac
+ANDROID_TOOLCHAIN_ARGS="-DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=${VERSION} -DCMAKE_ANDROID_ARCH_ABI=${PLATFORM} -DANDROID_NDK=${NDK_PATH} -DCMAKE_ANDROID_STL_TYPE=c++_static"
 DEPS_DIR="$(pwd)/iroha/dependencies"
 INSTALL_ARGS="-DCMAKE_INSTALL_PREFIX=${DEPS_DIR}"
 
@@ -45,7 +70,7 @@ sed -i.bak "s~find_package(JNI REQUIRED)~#find_package(JNI REQUIRED)~" ./iroha/s
 sed -i.bak "s~include_directories(${JAVA_INCLUDE_PATH})~#include_directories(${JAVA_INCLUDE_PATH})~" ./iroha/shared_model/bindings/CMakeLists.txt
 sed -i.bak "s~include_directories(${JAVA_INCLUDE_PATH2})~#include_directories(${JAVA_INCLUDE_PATH2})~" ./iroha/shared_model/bindings/CMakeLists.txt
 sed -i.bak "s~# the include path to jni.h~SET(CMAKE_SWIG_FLAGS \${CMAKE_SWIG_FLAGS} -package ${PACKAGE})~" ./iroha/shared_model/bindings/CMakeLists.txt
-sed -i.bak "s~swig_link_libraries(irohajava~swig_link_libraries(irohajava $(pwd)/protobuf/.build/libprotobufd.a ${NDK_PATH}/platforms/android-26/arch-arm64/usr/lib/liblog.so~" ./iroha/shared_model/bindings/CMakeLists.txt
+sed -i.bak "s~swig_link_libraries(irohajava~swig_link_libraries(irohajava $(pwd)/protobuf/.build/libprotobufd.a ${NDK_PATH}/platforms/android-${VERSION}/${ARCH}/usr/${LIBP}/liblog.so~" ./iroha/shared_model/bindings/CMakeLists.txt
 
 # build iroha
 sed -i.bak "s~find_library(protobuf_LIBRARY protobuf)~find_library(protobuf_LIBRARY protobufd)~" ./iroha/cmake/Modules/Findprotobuf.cmake # use debug lib
