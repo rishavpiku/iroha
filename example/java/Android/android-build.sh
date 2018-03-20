@@ -30,7 +30,7 @@ case "$PLATFORM" in
     ;;
   x86_64)
     ARCH=arch-x86_64
-    LIBP+=64
+    LIBP=lib64
     ;;
   *)
 	echo "Wrong ABI name: ${PLATFORM}"
