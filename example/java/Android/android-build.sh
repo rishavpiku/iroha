@@ -48,6 +48,7 @@ sed -i.bak "s~# the include path to jni.h~SET(CMAKE_SWIG_FLAGS \${CMAKE_SWIG_FLA
 sed -i.bak "s~swig_link_libraries(irohajava~swig_link_libraries(irohajava $(pwd)/protobuf/.build/libprotobufd.a ${NDK_PATH}/platforms/android-26/arch-arm64/usr/lib/liblog.so~" ./iroha/shared_model/bindings/CMakeLists.txt
 
 # build iroha
+sed -i.bak "s~find_library(protobuf_LIBRARY protobuf)~find_library(protobuf_LIBRARY protobufd)~" ./iroha/cmake/Modules/Findprotobuf.cmake # use debug lib
 sed -i.bak "s~find_program(protoc_EXECUTABLE protoc~set(protoc_EXECUTABLE $(pwd)/protobuf/host_build/protoc~" ./iroha/cmake/Modules/Findprotobuf.cmake # use host protoc
 cmake -H./iroha/shared_model -B./iroha/shared_model/build ${ANDROID_TOOLCHAIN_ARGS} -DTESTING=OFF -DSHARED_MODEL_DISABLE_COMPATIBILITY=ON -DSWIG_JAVA=ON -DCMAKE_PREFIX_PATH=${DEPS_DIR}
 VERBOSE=1 cmake --build ./iroha/shared_model/build --target irohajava
