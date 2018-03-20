@@ -4,6 +4,10 @@ PLATFORM=$1
 VERSION=$2
 NDK_PATH=$3
 PACKAGE=$4
+if [ -d lib ]; then
+	echo "Please run this script from an empty directory"
+	exit 1
+fi
 if [ "$#" -ne 4 ]; then
     echo "Illegal number of parameters"
     echo "Usage: ./android-build.sh <PLATFORM> <ANDROID_VERSION> <NDK_PATH> <PACKAGE>"
