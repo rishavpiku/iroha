@@ -20,7 +20,6 @@ case "$PLATFORM" in
     ;;  	
   arm64-v8a)
     ARCH=arch-arm64
-    LIBP+=64
     ;;
   x86)
     ARCH=arch-x86
