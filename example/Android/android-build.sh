@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -ex
 if [ -d lib ]; then
 	echo "Please run this script from an empty directory"
@@ -24,7 +24,7 @@ case "$PLATFORM" in
     ;;
   armeabi-v7a)
     ARCH=arch-arm
-    ;;  	
+    ;;
   arm64-v8a)
     ARCH=arch-arm64
     ;;
