@@ -21,7 +21,6 @@ target_link_libraries(tx_acceptance_test
         raw_block_insertion
         model_generators
         integration_framework
-        shared_model_ed25519_sha3
         shared_model_stateless_validation
         )
 addtest(get_transactions_test get_transactions_test.cpp)

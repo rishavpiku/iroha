@@ -45,14 +45,14 @@ auto checkStatelessInvalid = [](auto &status) {
           shared_model::interface::StatelessFailedTxResponse>>(status.get()));
 };
 auto checkProposal = [](auto &proposal) {
-  ASSERT_EQ(proposal->transactions.size(), 1);
+  ASSERT_EQ(proposal->transactions().size(), 1);
 
 };
 auto checkStatefulInvalid = [](auto &block) {
-  ASSERT_EQ(block->transactions.size(), 0);
+  ASSERT_EQ(block->transactions().size(), 0);
 };
 auto checkStatefulValid = [](auto &block) {
-  ASSERT_EQ(block->transactions.size(), 1);
+  ASSERT_EQ(block->transactions().size(), 1);
 };
 /**
  * @given non existent user
