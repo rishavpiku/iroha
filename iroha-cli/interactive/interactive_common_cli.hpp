@@ -19,8 +19,9 @@
 #define IROHA_CLI_INTERACTIVE_COMMON_CLI_HPP
 
 #include <algorithm>
-#include <iostream>
 #include <boost/optional.hpp>
+#include <iostream>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,11 +50,11 @@ namespace iroha_cli {
     // Description of parameters
     using ParamsDescription = std::vector<std::string>;
     // map for command - command description relationship
-    using DescriptionMap = std::unordered_map<std::string, std::string>;
+    using DescriptionMap = std::map<std::string, std::string>;
     // Points in a menu
     using MenuPoints = std::vector<std::string>;
     // map for command - ParamsDescription relationship
-    using ParamsMap = std::unordered_map<std::string, ParamsDescription>;
+    using ParamsMap = std::map<std::string, ParamsDescription>;
 
     // ------ Common commands short name ---------
     const std::string SAVE_CODE = "save";
@@ -157,12 +158,12 @@ namespace iroha_cli {
      * @return index for the next menu point
      */
     template <typename K, typename V>
-    std::size_t getNextIndex(std::unordered_map<K, V> parsers_map) {
+    std::size_t getNextIndex(std::map<K, V> parsers_map) {
       return parsers_map.size() == 0 ? 1 : parsers_map.size();
     }
 
     /**
-     * Find in unordered map with error reporting.
+     * Find in map with error reporting.
      * Will print unkown command if key not found.
      * @tparam K key type
      * @tparam V value type
@@ -170,9 +171,9 @@ namespace iroha_cli {
      * @param params_map - map
      * @return nullopt if key not found, value if found
      */
-    template <typename K, typename V>
-    boost::optional<V> findInHandlerMap(K command_name,
-                                         std::unordered_map<K, V> params_map) {
+    template <typename MapType>
+    boost::optional<typename MapType::mapped_type> findInHandlerMap(
+        typename MapType::key_type command_name, MapType params_map) {
       auto it = params_map.find(command_name);
       if (it == params_map.end()) {
         // Command not found, report error
