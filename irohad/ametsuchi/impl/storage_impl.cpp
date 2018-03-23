@@ -1,5 +1,5 @@
 /**
- * Copyright Soramitsu Co., Ltd. 2017 All Rights Reserved.
+ * Copyright Soramitsu Co., Ltd. 2018 All Rights Reserved.
  * http://soramitsu.co.jp
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  */
 
 #include "ametsuchi/impl/storage_impl.hpp"
-
+#include <boost/format.hpp>
 #include "ametsuchi/impl/flat_file/flat_file.hpp"  // for FlatFile
 #include "ametsuchi/impl/mutable_storage_impl.hpp"
 #include "ametsuchi/impl/postgres_block_query.hpp"
@@ -24,14 +24,17 @@
 #include "ametsuchi/impl/temporary_wsv_impl.hpp"
 #include "model/converters/json_common.hpp"
 #include "model/execution/command_executor_factory.hpp"  // for CommandExecutorFactory
+#include "postgres_ordering_service_persistent_state.hpp"
 
-#include <boost/format.hpp>
+// TODO: 14-02-2018 Alexey Chernyshov remove this after relocation to
+// shared_model https://soramitsu.atlassian.net/browse/IR-887
+#include "backend/protobuf/from_old_model.hpp"
 
 namespace iroha {
   namespace ametsuchi {
 
     const char *kCommandExecutorError = "Cannot create CommandExecutorFactory";
-    const char *kPsqlBroken = "Connection to PostgreSQL broken: {}";
+    const char *kPsqlBroken = "Connection to PostgreSQL broken: %s";
     const char *kTmpWsv = "TemporaryWsv";
 
     ConnectionContext::ConnectionContext(
@@ -41,6 +44,12 @@ namespace iroha {
         : block_store(std::move(block_store)),
           pg_lazy(std::move(pg_lazy)),
           pg_nontx(std::move(pg_nontx)) {}
+
+    StorageImpl::~StorageImpl() {
+      wsv_transaction_->commit();
+      wsv_connection_->disconnect();
+      log_->info("PostgresQL connection closed");
+    }
 
     StorageImpl::StorageImpl(
         std::string block_store_dir,
@@ -106,22 +115,22 @@ namespace iroha {
       auto wsv_transaction =
           std::make_unique<pqxx::nontransaction>(*postgres_connection, kTmpWsv);
 
-      nonstd::optional<hash256_t> top_hash;
+      nonstd::optional<shared_model::interface::types::HashType> top_hash;
 
       blocks_->getTopBlocks(1)
           .subscribe_on(rxcpp::observe_on_new_thread())
           .as_blocking()
-          .subscribe([&top_hash](auto block) { top_hash = block.hash; });
+          .subscribe([&top_hash](auto block) { top_hash = block->hash(); });
 
       return expected::makeValue<std::unique_ptr<MutableStorage>>(
           std::make_unique<MutableStorageImpl>(
-              top_hash.value_or(hash256_t{}),
+              top_hash.value_or(shared_model::interface::types::HashType("")),
               std::move(postgres_connection),
               std::move(wsv_transaction),
               std::move(command_executors.value())));
     }
 
-    bool StorageImpl::insertBlock(model::Block block) {
+    bool StorageImpl::insertBlock(const shared_model::interface::Block &block) {
       log_->info("create mutable storage");
       auto storageResult = createMutableStorage();
       bool inserted = false;
@@ -140,6 +149,32 @@ namespace iroha {
             log_->error(error.error);
           });
 
+      return inserted;
+    }
+
+    bool StorageImpl::insertBlocks(
+        const std::vector<std::shared_ptr<shared_model::interface::Block>>
+            &blocks) {
+      log_->info("create mutable storage");
+      bool inserted = true;
+      auto storageResult = createMutableStorage();
+      storageResult.match(
+          [&](iroha::expected::Value<std::unique_ptr<MutableStorage>>
+                  &mutableStorage) {
+            std::for_each(blocks.begin(), blocks.end(), [&](auto block) {
+              inserted &= mutableStorage.value->apply(
+                  *block, [](const auto &block, auto &query, const auto &hash) {
+                    return true;
+                  });
+            });
+            commit(std::move(mutableStorage.value));
+          },
+          [&](iroha::expected::Error<std::string> &error) {
+            log_->error(error.error);
+            inserted = false;
+          });
+
+      log_->info("insert blocks finished");
       return inserted;
     }
 
@@ -179,15 +214,17 @@ DROP TABLE IF EXISTS index_by_id_height_asset;
       block_store_->dropAll();
     }
 
-    expected::Result<ConnectionContext, std::string> StorageImpl::initConnections(
-        std::string block_store_dir, std::string postgres_options) {
+    expected::Result<ConnectionContext, std::string>
+    StorageImpl::initConnections(std::string block_store_dir,
+                                 std::string postgres_options) {
       auto log_ = logger::log("StorageImpl:initConnection");
       log_->info("Start storage creation");
 
       auto block_store = FlatFile::create(block_store_dir);
       if (not block_store) {
         return expected::makeError(
-            (boost::format("Cannot create block store in {}") % block_store_dir).str());
+            (boost::format("Cannot create block store in %s") % block_store_dir)
+                .str());
       }
       log_->info("block store created");
 
@@ -205,10 +242,10 @@ DROP TABLE IF EXISTS index_by_id_height_asset;
           *postgres_connection, "Storage");
       log_->info("transaction to PostgreSQL initialized");
 
-      return expected::makeValue(ConnectionContext(
-          std::move(*block_store),
-          std::move(postgres_connection),
-          std::move(wsv_transaction)));
+      return expected::makeValue(
+          ConnectionContext(std::move(*block_store),
+                            std::move(postgres_connection),
+                            std::move(wsv_transaction)));
     }
 
     expected::Result<std::shared_ptr<StorageImpl>, std::string>
@@ -217,7 +254,7 @@ DROP TABLE IF EXISTS index_by_id_height_asset;
       auto ctx_result = initConnections(block_store_dir, postgres_options);
       expected::Result<std::shared_ptr<StorageImpl>, std::string> storage;
       ctx_result.match(
-          [&](expected::Value<ConnectionContext> &ctx){
+          [&](expected::Value<ConnectionContext> &ctx) {
             storage = expected::makeValue(std::shared_ptr<StorageImpl>(
                 new StorageImpl(block_store_dir,
                                 postgres_options,
@@ -225,10 +262,7 @@ DROP TABLE IF EXISTS index_by_id_height_asset;
                                 std::move(ctx.value.pg_lazy),
                                 std::move(ctx.value.pg_nontx))));
           },
-          [&](expected::Error<std::string> &error) {
-            storage = error;
-      }
-      );
+          [&](expected::Error<std::string> &error) { storage = error; });
       return storage;
     }
 
@@ -237,9 +271,13 @@ DROP TABLE IF EXISTS index_by_id_height_asset;
       auto storage_ptr = std::move(mutableStorage);  // get ownership of storage
       auto storage = static_cast<MutableStorageImpl *>(storage_ptr.get());
       for (const auto &block : storage->block_store_) {
+        // TODO: rework to shared model converters once they are available
+        // IR-1084 Nikita Alekseev
+        auto old_block =
+            *std::unique_ptr<model::Block>(block.second->makeOldModel());
         block_store_->add(block.first,
                           stringToBytes(model::converters::jsonToString(
-                              serializer_.serialize(block.second))));
+                              serializer_.serialize(old_block))));
       }
 
       storage->transaction_->exec("COMMIT;");

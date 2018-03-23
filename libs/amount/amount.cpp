@@ -17,9 +17,10 @@
 
 #include "amount/amount.hpp"
 
-#include <logger/logger.hpp>
 #include <regex>
 #include <utility>
+
+using namespace boost::multiprecision;
 
 namespace iroha {
 

@@ -16,6 +16,8 @@ SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
 SET(CMAKE_INSTALL_RPATH "../lib")
 
 if(COVERAGE)
+  # remove -g flag to reduce binary size
+  list(REMOVE_ITEM CMAKE_CXX_FLAGS -g)
   set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
   set(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
   set(CMAKE_C_FLAGS "--coverage ${CMAKE_C_FLAGS}")
@@ -47,6 +49,12 @@ option(SHARED_MODEL_DISABLE_COMPATIBILITY "Disable backward compatibility in sha
 
 if (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug)
+endif()
+
+if(CMAKE_GENERATOR MATCHES "Make")
+  set(MAKE "$(MAKE)")
+else()
+  set(MAKE make)
 endif()
 
 if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)

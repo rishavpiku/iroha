@@ -21,7 +21,7 @@ add_library(bindings
 
 target_link_libraries(bindings
         shared_model_proto_backend
-        shared_model_ed25519_sha3
+        shared_model_cryptography
         generator
         shared_model_stateless_validation
         iroha_amount
@@ -30,7 +30,7 @@ target_link_libraries(bindings
 
 
 if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP)
-    find_package(SWIG 3.0.12 REQUIRED)
+    find_package(swig REQUIRED)
     include(${SWIG_USE_FILE})
 
     set(CMAKE_SWIG_FLAGS "")
@@ -40,6 +40,8 @@ if (SWIG_PYTHON OR SWIG_JAVA OR SWIG_CSHARP)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     set_source_files_properties(bindings.i PROPERTIES CPLUSPLUS ON)
     set_property(GLOBAL PROPERTY SWIG_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+    add_dependencies(bindings swig)
 endif()
 
 if (SWIG_PYTHON)

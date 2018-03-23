@@ -22,6 +22,7 @@ target_link_libraries(stateful_validator
     optional
     rxcpp
     model
+    model_interfaces
     logger
     )
 
@@ -40,4 +41,5 @@ target_link_libraries(chain_validator
     rxcpp
     model
     logger
+    supermajority_check
     )

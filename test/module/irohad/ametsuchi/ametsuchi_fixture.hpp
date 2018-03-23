@@ -18,12 +18,11 @@
 #ifndef IROHA_AMETSUCHI_FIXTURE_HPP
 #define IROHA_AMETSUCHI_FIXTURE_HPP
 
-#include "common/files.hpp"
-#include "logger/logger.hpp"
-
 #include <gtest/gtest.h>
 #include <pqxx/pqxx>
-
+#include "ametsuchi/impl/storage_impl.hpp"
+#include "common/files.hpp"
+#include "logger/logger.hpp"
 #include "model/generators/command_generator.hpp"
 
 namespace iroha {
@@ -56,16 +55,57 @@ namespace iroha {
       }
 
      protected:
-      virtual void SetUp() {
+      virtual void clear() {
+        pqxx::work txn(*connection);
+        txn.exec(drop_);
+        txn.commit();
+
+        iroha::remove_all(block_store_path);
+      }
+
+      virtual void disconnect() {
+        connection->disconnect();
+      }
+
+      virtual void connect() {
         connection = std::make_shared<pqxx::lazyconnection>(pgopt_);
         try {
           connection->activate();
         } catch (const pqxx::broken_connection &e) {
           FAIL() << "Connection to PostgreSQL broken: " << e.what();
         }
+
+        StorageImpl::create(block_store_path, pgopt_)
+            .match([&](iroha::expected::Value<std::shared_ptr<StorageImpl>>
+                           &_storage) { storage = _storage.value; },
+                   [](iroha::expected::Error<std::string> &error) {
+                     FAIL() << "StorageImpl: " << error.error;
+                   });
       }
-      virtual void TearDown() {
-        const auto drop = R"(
+
+      void SetUp() override {
+        connect();
+        storage->dropStorage();
+      }
+
+      void TearDown() override {
+        clear();
+        disconnect();
+      }
+
+      std::shared_ptr<pqxx::lazyconnection> connection;
+
+      model::generators::CommandGenerator cmd_gen;
+
+      std::shared_ptr<StorageImpl> storage;
+
+      std::string pgopt_ =
+          "host=localhost port=5432 user=postgres password=mysecretpassword";
+
+      std::string block_store_path = "/tmp/block_store";
+
+      // TODO(warchant): IR-1019 hide SQLs under some interface
+      const std::string drop_ = R"(
 DROP TABLE IF EXISTS account_has_signatory;
 DROP TABLE IF EXISTS account_has_asset;
 DROP TABLE IF EXISTS role_has_permissions;
@@ -82,23 +122,6 @@ DROP TABLE IF EXISTS height_by_account_set;
 DROP TABLE IF EXISTS index_by_creator_height;
 DROP TABLE IF EXISTS index_by_id_height_asset;
 )";
-
-        pqxx::work txn(*connection);
-        txn.exec(drop);
-        txn.commit();
-        connection->disconnect();
-
-        iroha::remove_all(block_store_path);
-      }
-
-      std::shared_ptr<pqxx::lazyconnection> connection;
-
-      model::generators::CommandGenerator cmd_gen;
-
-      std::string pgopt_ =
-          "host=localhost port=5432 user=postgres password=mysecretpassword";
-
-      std::string block_store_path = "/tmp/block_store";
 
       const std::string init_ = R"(
 CREATE TABLE IF NOT EXISTS role (

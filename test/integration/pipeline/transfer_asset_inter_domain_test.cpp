@@ -16,6 +16,10 @@
  */
 
 #include "integration/pipeline/tx_pipeline_integration_test_fixture.hpp"
+#include "backend/protobuf/from_old_model.hpp"
+
+using namespace std::chrono_literals;
+using namespace iroha::model::generators;
 
 class TransferAssetInterDomainTest : public TxPipelineIntegrationTestFixture {
  public:
@@ -60,20 +64,27 @@ class TransferAssetInterDomainTest : public TxPipelineIntegrationTestFixture {
     manager = std::make_shared<iroha::KeysManagerImpl>("node0");
     auto keypair = getVal(manager->loadKeys());
 
-    irohad = std::make_shared<TestIrohad>(
-        block_store_path,
-        pgopt_,
-        0,
-        10001,
-        10,
-        5000ms,
-        5000ms,
-        5000ms,
-        keypair);
+    irohad = std::make_shared<TestIrohad>(block_store_path,
+                                          pgopt_,
+                                          0,
+                                          10001,
+                                          10,
+                                          5000ms,
+                                          5000ms,
+                                          5000ms,
+                                          keypair);
     ASSERT_TRUE(irohad->storage);
 
-    irohad->storage->insertBlock(genesis_block);
+    irohad->storage->insertBlock(shared_model::proto::from_old(genesis_block));
+
+    // reset ordering storage state
+    irohad->resetOrderingService();
+
     irohad->init();
+
+    // restore World State View to make sure it is valid
+    irohad->restoreWsv();
+
     irohad->run();
   }
 

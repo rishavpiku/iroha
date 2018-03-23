@@ -17,12 +17,12 @@
 
 #include "ametsuchi/impl/postgres_wsv_command.hpp"
 #include "ametsuchi/impl/postgres_wsv_query.hpp"
+#include "framework/result_fixture.hpp"
 #include "model/account.hpp"
+#include "model/asset.hpp"
 #include "model/domain.hpp"
 #include "model/peer.hpp"
-#include "model/asset.hpp"
 #include "module/irohad/ametsuchi/ametsuchi_fixture.hpp"
-#include "framework/result_fixture.hpp"
 
 namespace iroha {
   namespace ametsuchi {
@@ -56,8 +56,6 @@ namespace iroha {
 
         wsv_transaction->exec(init_);
       }
-
-
 
       std::string role = "role", permission = "permission";
       model::Account account;
@@ -133,7 +131,7 @@ namespace iroha {
       ASSERT_NO_THROW(checkValueCase(command->insertAccount(account)));
       auto acc = query->getAccount(account.account_id);
       ASSERT_TRUE(acc.has_value());
-      ASSERT_EQ(account.json_data, acc.value().json_data);
+      ASSERT_EQ(account.json_data, acc.value()->jsonData());
     }
 
     /**
@@ -148,7 +146,7 @@ namespace iroha {
       auto acc = query->getAccount(account.account_id);
       ASSERT_TRUE(acc.has_value());
       ASSERT_EQ(R"({"id@domain": {"id": "val", "key": "value"}})",
-                acc.value().json_data);
+                acc.value()->jsonData());
     }
 
     /**
@@ -163,7 +161,7 @@ namespace iroha {
       auto acc = query->getAccount(account.account_id);
       ASSERT_TRUE(acc.has_value());
       ASSERT_EQ(R"({"admin": {"id": "val"}, "id@domain": {"key": "value"}})",
-                acc.value().json_data);
+                acc.value()->jsonData());
     }
 
     /**
@@ -178,7 +176,7 @@ namespace iroha {
       auto acc = query->getAccount(account.account_id);
       ASSERT_TRUE(acc.has_value());
       ASSERT_EQ(R"({"id@domain": {"id": "[val1, val2]", "key": "value"}})",
-                acc.value().json_data);
+                acc.value()->jsonData());
     }
 
     /**
@@ -192,7 +190,7 @@ namespace iroha {
           account.account_id, account.account_id, "key", "val2")));
       auto acc = query->getAccount(account.account_id);
       ASSERT_TRUE(acc.has_value());
-      ASSERT_EQ(R"({"id@domain": {"key": "val2"}})", acc.value().json_data);
+      ASSERT_EQ(R"({"id@domain": {"key": "val2"}})", acc.value()->jsonData());
     }
 
     /**
@@ -210,8 +208,7 @@ namespace iroha {
      * @then getAccountDetail will return nullopt
      */
     TEST_F(AccountTest, GetAccountDetailInvalidWhenNotFound) {
-      EXPECT_FALSE(query->getAccountDetail(
-          "invalid account id", "invalid_creator", "invalid_detail"));
+      EXPECT_FALSE(query->getAccountDetail("invalid account id"));
     }
 
     class AccountRoleTest : public WsvQueryCommandTest {
@@ -322,7 +319,7 @@ namespace iroha {
       ASSERT_NO_THROW(checkValueCase(command->insertAccountGrantablePermission(
           permittee_account.account_id, account.account_id, permission)));
 
-          ASSERT_TRUE(query->hasAccountGrantablePermission(
+      ASSERT_TRUE(query->hasAccountGrantablePermission(
           permittee_account.account_id, account.account_id, permission));
     }
 
@@ -348,7 +345,7 @@ namespace iroha {
 
     TEST_F(AccountGrantablePermissionTest,
            DeleteAccountGrantablePermissionWhenAccountsPermissionExist) {
-ASSERT_NO_THROW(checkValueCase(command->deleteAccountGrantablePermission(
+      ASSERT_NO_THROW(checkValueCase(command->deleteAccountGrantablePermission(
           permittee_account.account_id, account.account_id, permission)));
 
       ASSERT_FALSE(query->hasAccountGrantablePermission(

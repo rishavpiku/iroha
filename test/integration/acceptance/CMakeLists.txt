@@ -24,3 +24,18 @@ target_link_libraries(tx_acceptance_test
         shared_model_ed25519_sha3
         shared_model_stateless_validation
         )
+addtest(get_transactions_test get_transactions_test.cpp)
+target_link_libraries(get_transactions_test
+  application
+  integration_framework
+  shared_model_proto_builders
+  shared_model_stateless_validation
+  )
+
+addtest(invalid_fields_test invalid_fields_test.cpp)
+target_link_libraries(invalid_fields_test
+  application
+  integration_framework
+  shared_model_proto_builders
+  shared_model_stateless_validation
+  )
