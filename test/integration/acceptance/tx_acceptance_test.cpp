@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-// TODO: Solonets / / Satisfy disabled test
 
 #include "backend/protobuf/transaction.hpp"
 #include "builders/protobuf/queries.hpp"
@@ -85,6 +84,8 @@ TEST(AcceptanceTest, NonExistentCreatorAccountId) {
  *       AND STATELESS_VALIDATION_SUCCESS on first
  *       AND STATEFUL_VALIDATION_FAILED on second
  */
+
+// TODO: Solonets / IR-1166 - Double tx counter / Satisfy disabled test
 TEST(AcceptanceTest, DISABLED_DublicatedTxCounter) {
   auto tx1 = shared_model::proto::TransactionBuilder()
                  .txCounter(2)
