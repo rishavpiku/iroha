@@ -54,6 +54,7 @@ auto checkStatefulInvalid = [](auto &block) {
 auto checkStatefulValid = [](auto &block) {
   ASSERT_EQ(block->transactions().size(), 1);
 };
+
 /**
  * @given non existent user
  * @when sending  transaction to the ledger
@@ -113,11 +114,11 @@ TEST(AcceptanceTest, DISABLED_DublicatedTxCounter) {
 
 /**
  * @given some user
- * @when sending  transactions with the Maximum txCounter possible to the ledger
+ * @when sending transactions with the Maximum txCounter possible to the ledger
  * @then receive STATELESS_VALIDATION_SUCCESS status
  *       AND STATEFUL_VALIDATION_SUCCESS on that tx
  */
-TEST(AcceptanceTest, DISABLED_MaxTxCounter) {
+TEST(AcceptanceTest, MaxTxCounter) {
   auto tx1 = shared_model::proto::TransactionBuilder()
                  .txCounter(2)
                  .createdTime(iroha::time::now())
@@ -136,7 +137,7 @@ TEST(AcceptanceTest, DISABLED_MaxTxCounter) {
 
 /**
  * @given some user
- * @when sending  transactions with an 1 hour old UNIX time
+ * @when sending transactions with an 1 hour old UNIX time
  * @then receive STATELESS_VALIDATION_SUCCESS status
  *       AND STATEFUL_VALIDATION_SUCCESS on that tx
  */
@@ -155,9 +156,10 @@ TEST(AcceptanceTest, Transaction1HourOld) {
       .checkBlock(checkStatefulValid)
       .done();
 }
+
 /**
  * @given some user
- * @when sending  transactions with an less than 24 hour old UNIX time
+ * @when sending transactions with an less than 24 hour old UNIX time
  * @then receive STATELESS_VALIDATION_SUCCESS status
  *       AND STATEFUL_VALIDATION_SUCCESS on that tx
  */
@@ -177,9 +179,10 @@ TEST(AcceptanceTest, DISABLED_TransactionLess24HourOld) {
       .checkBlock(checkStatefulValid)
       .done();
 }
+
 /**
  * @given some user
- * @when sending  transactions with an more than 24 hour old UNIX time
+ * @when sending transactions with an more than 24 hour old UNIX time
  * @then receive STATELESS_VALIDATION_FAILED status
  */
 TEST(AcceptanceTest, TransactionMore24HourOld) {
@@ -205,13 +208,14 @@ TEST(AcceptanceTest, TransactionMore24HourOld) {
       .sendTx(tx, checkStatelessInvalid)
       .done();
 }
+
 /**
  * @given some user
- * @when sending  transactions with an less that 5 minutes from future UNIX time
+ * @when sending transactions with an less that 5 minutes from future UNIX time
  * @then receive STATELESS_VALIDATION_SUCCESS status
  *       AND STATEFUL_VALIDATION_SUCCESS on that tx
  */
-TEST(AcceptanceTest, DISABLED_Transaction5MinutesFromFuture) {
+TEST(AcceptanceTest, Transaction5MinutesFromFuture) {
   auto tx = shared_model::proto::TransactionBuilder()
                 .txCounter(2)
                 .createdTime(iroha::time::now(std::chrono::minutes(5)
@@ -228,9 +232,10 @@ TEST(AcceptanceTest, DISABLED_Transaction5MinutesFromFuture) {
       .checkBlock(checkStatefulValid)
       .done();
 }
+
 /**
  * @given some user
- * @when sending  transactions with an 10 minutes from future UNIX time
+ * @when sending transactions with an 10 minutes from future UNIX time
  * @then receive STATELESS_VALIDATION_FAILED status
  */
 TEST(AcceptanceTest, Transaction10MinutesFromFuture) {
@@ -254,12 +259,13 @@ TEST(AcceptanceTest, Transaction10MinutesFromFuture) {
       .sendTx(tx, checkStatelessInvalid)
       .done();
 }
+
 /**
  * @given some user
  * @when sending transactions with an empty public Key
  * @then receive STATELESS_VALIDATION_FAILED status
  */
-TEST(AcceptanceTest, DISABLED_TransactionEmptyPubKey) {
+TEST(AcceptanceTest, TransactionEmptyPubKey) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
           .txCounter(2)
@@ -283,12 +289,13 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptyPubKey) {
       .sendTx(tx, checkStatelessInvalid)
       .done();
 }
+
 /**
  * @given some user
  * @when sending transactions with an empty signedBlob
  * @then receive STATELESS_VALIDATION_FAILED status
  */
-TEST(AcceptanceTest, DISABLED_TransactionEmptySignedblob) {
+TEST(AcceptanceTest, TransactionEmptySignedblob) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
           .txCounter(2)
@@ -310,12 +317,13 @@ TEST(AcceptanceTest, DISABLED_TransactionEmptySignedblob) {
       .sendTx(tx, checkStatelessInvalid)
       .done();
 }
+
 /**
  * @given some user
  * @when sending transactions with Invalid PublicKey
  * @then receive STATELESS_VALIDATION_FAILED status
  */
-TEST(AcceptanceTest, DISABLED_TransactionInvalidPublicKey) {
+TEST(AcceptanceTest, TransactionInvalidPublicKey) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
           .txCounter(2)
@@ -338,12 +346,13 @@ TEST(AcceptanceTest, DISABLED_TransactionInvalidPublicKey) {
       .sendTx(tx, checkStatelessInvalid)
       .done();
 }
+
 /**
  * @given some user
  * @when sending transactions with Invalid SignedBlock
  * @then receive STATELESS_VALIDATION_FAILED status
  */
-TEST(AcceptanceTest, DISABLED_TransactionInvalidSignedBlob) {
+TEST(AcceptanceTest, TransactionInvalidSignedBlob) {
   shared_model::proto::Transaction tx =
       TestTransactionBuilder()
           .txCounter(2)
@@ -369,6 +378,7 @@ TEST(AcceptanceTest, DISABLED_TransactionInvalidSignedBlob) {
       .sendTx(tx, checkStatelessInvalid)
       .done();
 }
+
 /**
  * @given some user
  * @when sending transactions with valid signature

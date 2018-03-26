@@ -26,12 +26,12 @@
  * validation and "required fields" check
  */
 using TestTransactionBuilder = shared_model::proto::TemplateTransactionBuilder<
-        (1 << shared_model::proto::TemplateTransactionBuilder<>::total) - 1,
-        shared_model::validation::TransactionAlwaysValidValidator,
-        shared_model::proto::Transaction>;
+    (1 << shared_model::proto::TemplateTransactionBuilder<>::total) - 1,
+    shared_model::validation::TransactionAlwaysValidValidator,
+    shared_model::proto::Transaction>;
 
 using TestUnsignedTransactionBuilder =
-shared_model::proto::TemplateTransactionBuilder<
+    shared_model::proto::TemplateTransactionBuilder<
         (1 << shared_model::proto::TemplateTransactionBuilder<>::total) - 1,
         shared_model::validation::TransactionAlwaysValidValidator,
         shared_model::proto::UnsignedWrapper<shared_model::proto::Transaction>>;
