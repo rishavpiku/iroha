@@ -66,7 +66,7 @@ mkdir "$DEPS_DIR"/lib
 mkdir "$DEPS_DIR"/include
 
 # boost
-curl -OL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+wget https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
 tar xf ./boost_1_66_0.tar.gz
 cp -R ./boost_1_66_0/boost "$DEPS_DIR"/include
 
