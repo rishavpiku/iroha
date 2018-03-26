@@ -366,7 +366,7 @@ TEST(AcceptanceTest, TransactionInvalidSignedBlob) {
   protosig.set_pubkey(
       shared_model::crypto::toBinaryString(kAdminKeypair.publicKey()));
   auto raw = signedBlob.blob();
-  raw[0] = (raw[0] == std::numeric_limits<uint8_t>::max() ? raw[0] + 1 : 0);
+  raw[0] = (raw[0] == std::numeric_limits<uint8_t>::max() ? 0 : raw[0] + 1);
   auto wrongBlob = shared_model::crypto::Blob(raw);
   protosig.set_signature(shared_model::crypto::toBinaryString(wrongBlob));
   auto *s1 = new shared_model::proto::Signature(protosig);
